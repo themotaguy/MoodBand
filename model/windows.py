@@ -23,14 +23,14 @@ WINDOW_FEATURES = [
 ]
 
 
-def load_minutes():
-    """Per-participant minute series: {id: (minutes, bpm_mean, bpm_std)}, {id: steps Series}."""
-    for name in ("sema_responses.csv", "minute_hr.csv.gz", "minute_steps.csv.gz"):
-        if not (DATA / name).exists():
-            raise FileNotFoundError(f"{DATA / name} missing — run model/extract_lifesnaps_mongo.py first.")
-    hr = pd.read_csv(DATA / "minute_hr.csv.gz")
+def load_minutes(data_dir=DATA):
+    """Per-participant minute series: {id: DataFrame(minute, bpm_mean, bpm_std, n)}, {id: steps Series}."""
+    for name in ("minute_hr.csv.gz", "minute_steps.csv.gz"):
+        if not (data_dir / name).exists():
+            raise FileNotFoundError(f"{data_dir / name} missing — run the dataset's extraction script first.")
+    hr = pd.read_csv(data_dir / "minute_hr.csv.gz")
     hr["minute"] = pd.to_datetime(hr["minute"])
-    steps = pd.read_csv(DATA / "minute_steps.csv.gz")
+    steps = pd.read_csv(data_dir / "minute_steps.csv.gz")
     steps["minute"] = pd.to_datetime(steps["minute"])
     hr_by_id = {pid: g.sort_values("minute") for pid, g in hr.groupby("id")}
     steps_by_id = {pid: g.set_index("minute")["steps"].sort_index() for pid, g in steps.groupby("id")}
@@ -44,24 +44,35 @@ def window_dataset(window_min=30, minutes=None):
     sema["mood"] = sema["mood"].map(SEMA_TO_MOODBAND)
     sema = sema.dropna(subset=["mood"])
     sema["ts"] = pd.to_datetime(sema["completed_ts"]).dt.floor("min")
+    df = window_features(sema[["id", "ts", "mood"]], hr_by_id, steps_by_id, window_min)
+    return df[WINDOW_FEATURES], df["mood"], df["id"], df
 
+
+def window_features(reports, hr_by_id, steps_by_id, window_min=30):
+    """Features from the window_min minutes ending at each report.
+
+    reports: DataFrame with id and ts (local time, minute precision); any other
+    columns (labels) are carried through. Reports with < MIN_COVERAGE HR minutes
+    in the window are dropped. Shared by LifeSnaps and PMData (pmdata.py).
+    """
     window = pd.Timedelta(minutes=window_min)
     rows = []
-    for r in sema.itertuples():
-        hr = hr_by_id.get(r.id)
+    for r in reports.to_dict("records"):
+        hr = hr_by_id.get(r["id"])
         if hr is None:
             continue
+        ts = r["ts"]
         person_mean, person_std = hr["bpm_mean"].mean(), hr["bpm_mean"].std()
-        lo, hi = hr["minute"].searchsorted([r.ts - window, r.ts], side="right")
+        lo, hi = hr["minute"].searchsorted([ts - window, ts], side="right")
         w = hr.iloc[lo:hi]
         if len(w) < MIN_COVERAGE * window_min:
             continue
-        t = (w["minute"] - r.ts).dt.total_seconds().to_numpy() / 60
-        st = steps_by_id.get(r.id, pd.Series(dtype=float))
-        st = st[(st.index > r.ts - window) & (st.index <= r.ts)]
+        t = (w["minute"] - ts).dt.total_seconds().to_numpy() / 60
+        st = steps_by_id.get(r["id"], pd.Series(dtype=float))
+        st = st[(st.index > ts - window) & (st.index <= ts)]
         hr_mean = w["bpm_mean"].mean()
         rows.append({
-            "id": r.id, "ts": r.ts, "mood": r.mood,
+            **r,
             "hr_mean": hr_mean,
             "hr_std": w["bpm_mean"].std(),
             "hr_min": w["bpm_mean"].min(),
@@ -72,8 +83,7 @@ def window_dataset(window_min=30, minutes=None):
             "hr_z": (hr_mean - person_mean) / person_std,
             "steps_sum": st.sum(),
             "active_min": int((st > 0).sum()),
-            "hour_sin": np.sin(2 * np.pi * r.ts.hour / 24),
-            "hour_cos": np.cos(2 * np.pi * r.ts.hour / 24),
+            "hour_sin": np.sin(2 * np.pi * ts.hour / 24),
+            "hour_cos": np.cos(2 * np.pi * ts.hour / 24),
         })
-    df = pd.DataFrame(rows)
-    return df[WINDOW_FEATURES], df["mood"], df["id"], df
+    return pd.DataFrame(rows)

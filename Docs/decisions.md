@@ -211,6 +211,36 @@ multi-seed averages.
 
 ---
 
+## 10. PMData: cross-dataset check inconclusive; not used for training
+
+**Finding** (Oct 15, 2026): PMData cannot confirm or refute that the
+LifeSnaps model generalizes. Its labels are a **daily** PMSys wellness
+report (mood and stress, 1-5, 5 = best), mostly filled in right after
+waking (6-10 am) and heavily concentrated at 3 — not in-the-moment mood
+categories. `model/evaluate_pmdata.py` applies the LifeSnaps 30-min model
+to the 30 min before each report (1,504 reports, 16 participants) and
+measures Spearman correlation:
+- P(stressed) vs stress: pooled 0.00, within-person +0.05 (wrong
+  direction), expected sign in 5/16 participants.
+- P(happy) − P(sad) vs mood: pooled +0.11, within-person +0.03, expected
+  sign in 11/16 (Wilcoxon p = 0.32) — the pooled effect is between-person,
+  not mood.
+- Reference: a Random Forest trained *on PMData itself*
+  (leave-one-participant-out) also finds nothing (within-person ρ ≈ 0
+  for both stress and mood).
+
+Because PMData's own labels show no detectable link to pre-report HR/steps,
+the failed transfer says more about PMData's label type than about the
+LifeSnaps model. **Decision**: PMData is not used for training or as the
+generalization check. Out-of-sample validation will come from MoodBand's
+own trial (in-the-moment labels with the same SEMA-style protocol).
+
+PMSys timestamps are UTC; Fitbit's are local. Converting reports to
+Europe/Oslo was verified against Fitbit sleep logs: 4% of reports fall
+inside logged main sleep vs. 35% if left in UTC.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it
@@ -225,5 +255,11 @@ multi-seed averages.
   it into "stressed"? Note: the raw SEMA3 data contains **2 "ANGER"**
   responses (plus 2 Surprise, 2 Sadness, 1 Fear, 1 Joy — apparently a
   different survey version), far too few to train on.
+- [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: review
+  and sign the **TILES-2018 data-use agreement** (account approved; download
+  blocked until the DUA is signed). TILES-2018: Fitbit Charge 2, 212
+  hospital workers, 10 weeks, semi-daily affect/anxiety/stress self-reports
+  — backup/additional training data while EmoPhone access is pending (see
+  `datasets.md`). Only the main data record is needed, not the audio record.
 - [ ] (Informational, not blocking) Prof. Zantout was checking with Dr. Yoon
   about a possibly related wearable project elsewhere on campus.

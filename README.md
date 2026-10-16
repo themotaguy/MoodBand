@@ -66,6 +66,7 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 | 7 | **"Angry" deferred; classifier is 4-class for now** | The primary dataset (LifeSnaps) has no anger label. To be discussed with the supervisor. |
 | 8 | Overnight HRV/sleep kept out of the generalized model; optional for personalized | Lowered accuracy on unseen participants; small, not-yet-significant gain per person |
 | 9 | Classify from the **30 minutes of heart rate + steps before each mood report** | Matches how the app will run on live data; slightly better than hourly averages |
+| 10 | PMData not used; cross-dataset check inconclusive | Its daily, mostly post-wake 1–5 scores show no link to heart rate/steps even for a PMData-trained model; validation will come from MoodBand's own trial |
 
 ## Project status
 
@@ -78,7 +79,7 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 - [x] First Random Forest mood-classification baseline
 - [x] Overnight HRV/sleep features evaluated (Decision #8)
 - [x] Minute-level heart rate from the LifeSnaps MongoDB dump (Decision #9)
-- [ ] Improve the classifier further (PMData cross-dataset check)
+- [x] PMData cross-dataset check — inconclusive (Decision #10)
 - [ ] Feedback-decision module
 - [ ] Mobile companion app (accessible, screen-reader compatible)
 - [ ] Offline end-to-end integration
@@ -102,6 +103,8 @@ Balanced accuracy, averaged over 5 repeated participant-grouped splits (chance =
 
 An early baseline: consistently better than chance, but heart rate and steps carry limited mood signal across people. Personalized models do better, but with few test labels per person their numbers vary by several points between runs. "Sad" remains hardest (F1 ≈ 0.13). See Decisions #8–#9 for detail.
 
+**Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
+
 ## Repository structure
 
 ```
@@ -112,6 +115,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── lifesnaps.py          # Hourly/daily CSV loading, mood-label mapping, features
 │   ├── extract_lifesnaps_mongo.py  # One-off: MongoDB dump → minute-level HR/steps
 │   ├── windows.py            # Features from the 30 min before each mood report
+│   ├── pmdata.py             # PMData loader + minute-level extraction
+│   ├── evaluate_pmdata.py    # Cross-dataset check against PMData
 │   ├── explore_lifesnaps.py  # Exploratory data analysis
 │   ├── train_baseline.py     # Random Forest training + evaluation
 │   └── requirements.txt
@@ -133,6 +138,8 @@ python3 -m venv .venv
 .venv/bin/python model/extract_lifesnaps_mongo.py path/to/mongo_rais_anonymized  # one-off, ~3 min
 .venv/bin/python model/explore_lifesnaps.py   # dataset summary + label coverage
 .venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
+.venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
+.venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
 ```
 
 ## Tech stack

@@ -34,19 +34,31 @@ Done:
   (overnight-only supplementary signal) — see `docs/literature-review.md`.
 - Full project proposal written (architecture, methodology, timeline,
   budget) — see `docs/proposal-summary.md`.
-- Candidate training datasets identified (LifeSnaps primary, PMData
-  secondary) — see `docs/datasets.md`.
+- **Mood model baseline built (Oct 15, 2026)** — `model/`. Random Forest on
+  heart rate + steps from the 30 min before each LifeSnaps mood report
+  (minute-level data from the LifeSnaps MongoDB dump): balanced accuracy
+  ~0.33 vs 0.25 chance, 4 classes ("angry" deferred — no label in
+  LifeSnaps). Overnight HRV/sleep and PMData were tried and didn't help.
+  See `docs/decisions.md` #7-#10 and the README's results section. Run with
+  the project venv: `.venv/bin/python model/train_baseline.py`.
 
 Not yet done / in progress:
-1. **Acquire datasets and start building the classification model.**
-   LifeSnaps CSVs need to be downloaded by the user (Zenodo/Kaggle — no
-   network access assumed in this repo's dev environment) and placed under
-   `data/` (gitignored). Model work starts from there.
-2. **Prototype against the Google Health API** to confirm it actually
+1. **Feedback-decision module — next build step.** Plan drafted in
+   `docs/feedback-module-plan.md`, backed by `docs/literature-review.md`
+   §4b. Waiting on the user's answers to the plan's two open questions
+   before building. §4b citations still need verifying through LibKey.
+2. **More training data (pending access).** EmoPhone (Fitbit, ~300
+   participants, includes anger) requested on Harvard Dataverse; TILES-2018
+   account approved but its data-use agreement needs Prof. Zantout's
+   signature. See `docs/datasets.md`. Questions for the weekly Wednesday
+   supervisor meeting are tracked under "Open items" in `docs/decisions.md`.
+3. **Prototype against the Google Health API** to confirm it actually
    supports what the proposal assumes, and flag any missing pieces (e.g.,
    confirm real-time HR resolution, confirm HRV truly is overnight-only
-   under the *new* API, confirm OAuth/auth flow works end-to-end).
-3. Prof. Zantout was separately checking with Dr. Yoon about a possibly
+   under the *new* API, confirm OAuth/auth flow works end-to-end). Per the
+   build order, this comes after the offline pipeline (model, feedback
+   module, app) works.
+4. Prof. Zantout was separately checking with Dr. Yoon about a possibly
    related wearable project elsewhere on campus — informational, no action
    needed from the code side.
 
@@ -129,6 +141,8 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
   architecture flexibility, build ordering) and the reasoning behind each.
 - `docs/proposal-summary.md` — condensed version of the full project
   proposal: aim, scope, methodology phases, feedback-mapping table, timeline.
+- `docs/feedback-module-plan.md` — draft plan for the feedback-decision
+  module (next build step), with open questions awaiting the user.
 - `docs/datasets.md` — candidate training datasets (LifeSnaps, PMData, and
   others considered), what each contains, and how to get them.
 

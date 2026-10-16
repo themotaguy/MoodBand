@@ -78,6 +78,58 @@ intensity). [10] is the reason **every visual cue has a corresponding audio
 or haptic equivalent by default** — a screen-reader-compatible UI alone is
 not treated as sufficient.
 
+## 4b. Mood-Regulation Interventions and Delivery Timing (added Oct 15, 2026)
+
+> **Draft — citations not yet verified through LibKey.** Found via web
+> search; several effect sizes come from abstracts/summaries. Resolve each
+> through LibKey and read the full text before citing in a report.
+
+Sections 1-4 cover *how* to deliver feedback accessibly. This section covers
+*which* interventions help each mood and *when* to deliver them — evidence
+for the feedback-decision module (`Docs/feedback-module-plan.md`).
+
+- **JITAI framework** — Nahum-Shani et al. (just-in-time adaptive
+  interventions; PMC5364076). Components: decision points, tailoring
+  variables (vulnerability vs. receptivity), intervention options, decision
+  rules. The feedback-decision module is a JITAI decision rule.
+- **Breathwork for stress** — Fincham et al., Sci. Rep. 2023 (PMC9828383):
+  12 RCTs, stress g ≈ −0.35; anxiety g ≈ −0.32; depression g ≈ −0.40.
+  Shao et al., Mindfulness 2024: slow-paced breathing — clear
+  cardiovascular effects, perceived stress only marginal (SMD −0.51, p=.06).
+- **Vibrotactile breathing pacer** — PIV++ (Stanford/UCSC, CHI 2020):
+  wearable vibration-guided slow breathing reduced anxiety under a cognitive
+  stressor (d = .33); strong-exhale patterns worked best; personalization
+  mattered.
+- **Slow false-heartbeat haptics** — EmotionCheck (Costa et al., Cornell;
+  PMC6435301): wrist taps slightly slower than actual heart rate reduced
+  anxiety (67 participants).
+- **Music for stress** — de Witte et al., Health Psychol. Rev. 2020
+  (PubMed 31167611): 104 RCTs; physiological d ≈ .38, psychological
+  d ≈ .55, largest effect on heart rate.
+- **Iso principle for sadness** — Starcke et al., IJERPH 2021
+  (PMC8656869): after induced sadness, sad-then-happy music ended with more
+  positive affect than happy music alone. Small samples.
+- **Detection-based stress interventions** — Koh et al., CHI 2026
+  (systematic review, 52 studies): just-in-time delivery is most common but
+  causes unwanted-moment interruptions, fatigue, attrition; "perceptual
+  mismatch" (exercise flagged as stress) erodes trust; recommends
+  human-in-the-loop correction and explaining *why*.
+- **User response to stress alerts** — veteran cycling trial (arXiv
+  2606.13529): alerts felt "overly sensitive"; brief, interpretable
+  notifications preferred. Law-enforcement smartwatch study (BMC Public
+  Health 2022): a vibration when HR stays high was among the most useful
+  features. Twente two-week studies: stress feedback did not raise average
+  stress, but individuals varied — some felt more stressed.
+
+**Why this matters for MoodBand**: haptic breathing pacing (PIV++,
+EmotionCheck) is evidence-backed *and* inherently non-visual — ideal for
+visually impaired users. Sadness audio should follow the iso principle
+rather than jump to upbeat music. The module must avoid alert fatigue
+(confidence gating, cooldowns), avoid flagging exercise as stress, phrase
+feedback as suggestions, and let users confirm/correct detections. No solid
+evidence was found for anger-specific interventions or for routine positive
+feedback on happy/neutral states.
+
 ## 5. Synthesis
 
 Physiological signals can be mapped onto discrete moods [1], [2]. A

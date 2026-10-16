@@ -1,7 +1,10 @@
 # Project Proposal — Summary
 
-Condensed from the full proposal document (`Capstone_Project_Proposal_MoodBand_Revised.docx`,
-kept outside this repo / in the course drive). This summary is what Claude
+Condensed from the full proposal, **`Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf`**
+(authoritative; if the two disagree, the PDF wins). Note: the proposal's
+Table 4 and §7.3 predate the feedback-module decisions in
+`feedback-module-plan.md` (three profiles; no happy/neutral feedback;
+iso-principle audio for sadness). This summary is what Claude
 Code needs day-to-day; go to the full doc for formal/submission purposes.
 
 ## Aim

@@ -1,5 +1,11 @@
 # Literature Review
 
+> **Authoritative version: `Docs/RitikMota_Capstone_LiteratureReview_mk2.pdf`.**
+> This file is a working summary for Claude Code. Its §1–4 and §6–7 match
+> mk2 (same references [1]–[10]). §4b is newer research (Oct 15, 2026)
+> being written into the formal review as a new §5. If this file and the
+> PDF disagree, the PDF wins.
+
 Ten papers, reviewed across four themes. Each theme ends with an explicit
 note on how it shaped MoodBand's design — not just a summary of findings.
 
@@ -80,45 +86,41 @@ not treated as sufficient.
 
 ## 4b. Mood-Regulation Interventions and Delivery Timing (added Oct 15, 2026)
 
-> **Draft — citations not yet verified through LibKey.** Found via web
-> search; several effect sizes come from abstracts/summaries. Resolve each
-> through LibKey and read the full text before citing in a report.
+> **Citations verified through LibKey (Oct 15, 2026)** except where marked.
+> Effect sizes were taken from abstracts/summaries — confirm against the
+> full text before quoting them in a report. Full references at the end of
+> this section.
 
 Sections 1-4 cover *how* to deliver feedback accessibly. This section covers
 *which* interventions help each mood and *when* to deliver them — evidence
 for the feedback-decision module (`Docs/feedback-module-plan.md`).
 
-- **JITAI framework** — Nahum-Shani et al. (just-in-time adaptive
-  interventions; PMC5364076). Components: decision points, tailoring
+- **JITAI framework** — Nahum-Shani et al. 2018 [11]. Components: decision points, tailoring
   variables (vulnerability vs. receptivity), intervention options, decision
   rules. The feedback-decision module is a JITAI decision rule.
-- **Breathwork for stress** — Fincham et al., Sci. Rep. 2023 (PMC9828383):
+- **Breathwork for stress** — Fincham et al. 2023 [12]:
   12 RCTs, stress g ≈ −0.35; anxiety g ≈ −0.32; depression g ≈ −0.40.
-  Shao et al., Mindfulness 2024: slow-paced breathing — clear
+  Shao et al. 2024 [13]: slow-paced breathing — clear
   cardiovascular effects, perceived stress only marginal (SMD −0.51, p=.06).
-- **Vibrotactile breathing pacer** — PIV++ (Stanford/UCSC, CHI 2020):
+- **Vibrotactile breathing pacer** — Miri et al., CHI 2020 [14]:
   wearable vibration-guided slow breathing reduced anxiety under a cognitive
   stressor (d = .33); strong-exhale patterns worked best; personalization
   mattered.
-- **Slow false-heartbeat haptics** — EmotionCheck (Costa et al., Cornell;
-  PMC6435301): wrist taps slightly slower than actual heart rate reduced
+- **Slow false-heartbeat haptics** — EmotionCheck, Costa et al. 2017 [15]: wrist taps slightly slower than actual heart rate reduced
   anxiety (67 participants).
-- **Music for stress** — de Witte et al., Health Psychol. Rev. 2020
-  (PubMed 31167611): 104 RCTs; physiological d ≈ .38, psychological
+- **Music for stress** — de Witte et al. 2020 [16]: 104 RCTs; physiological d ≈ .38, psychological
   d ≈ .55, largest effect on heart rate.
-- **Iso principle for sadness** — Starcke et al., IJERPH 2021
-  (PMC8656869): after induced sadness, sad-then-happy music ended with more
+- **Iso principle for sadness** — Starcke et al. 2021 [17]: after induced sadness, sad-then-happy music ended with more
   positive affect than happy music alone. Small samples.
-- **Detection-based stress interventions** — Koh et al., CHI 2026
+- **Detection-based stress interventions** — Koh et al., CHI 2026 [18]
   (systematic review, 52 studies): just-in-time delivery is most common but
   causes unwanted-moment interruptions, fatigue, attrition; "perceptual
   mismatch" (exercise flagged as stress) erodes trust; recommends
   human-in-the-loop correction and explaining *why*.
-- **User response to stress alerts** — veteran cycling trial (arXiv
-  2606.13529): alerts felt "overly sensitive"; brief, interpretable
-  notifications preferred. Law-enforcement smartwatch study (BMC Public
-  Health 2022): a vibration when HR stays high was among the most useful
-  features. Twente two-week studies: stress feedback did not raise average
+- **User response to stress alerts** — veteran cycling trial [19]: alerts
+  felt "overly sensitive"; brief, interpretable notifications preferred.
+  Law-enforcement smartwatch study, Jetelina et al. 2022 [20]: a vibration when HR stays high was among the most useful
+  features. Twente two-week studies [21]: stress feedback did not raise average
   stress, but individuals varied — some felt more stressed.
 
 **Why this matters for MoodBand**: haptic breathing pacing (PIV++,
@@ -129,6 +131,20 @@ rather than jump to upbeat music. The module must avoid alert fatigue
 feedback as suggestions, and let users confirm/correct detections. No solid
 evidence was found for anger-specific interventions or for routine positive
 feedback on happy/neutral states.
+
+**References for §4b**
+
+11. I. Nahum-Shani, S. N. Smith, B. J. Spring, L. M. Collins, K. Witkiewitz, A. Tewari, and S. A. Murphy, "Just-in-time adaptive interventions (JITAIs) in mobile health: Key components and design principles for ongoing health behavior support," Ann. Behav. Med., vol. 52, no. 6, pp. 446–462, 2018. doi:10.1007/s12160-016-9830-8 (open access)
+12. G. W. Fincham, C. Strauss, J. Montero-Marin, and K. Cavanagh, "Effect of breathwork on stress and mental health: A meta-analysis of randomised-controlled trials," Sci. Rep., vol. 13, p. 432, 2023. doi:10.1038/s41598-022-27247-y (open access)
+13. R. Shao, I. S. C. Man, and T. M. C. Lee, "The effect of slow-paced breathing on cardiovascular and emotion functions: A meta-analysis and systematic review," Mindfulness, vol. 15, no. 1, pp. 1–18, 2024. doi:10.1007/s12671-023-02294-2 (Northeastern access)
+14. P. Miri, E. Jusuf, H. Margarit, R. Flory, A. Uusberg, K. Isbister, K. Marzullo, and J. J. Gross, "Evaluating a personalizable, inconspicuous vibrotactile (PIV) breathing pacer for in-the-moment affect regulation," in Proc. CHI 2020. doi:10.1145/3313831.3376757 — *not indexed in LibKey; DOI confirmed via NSF PAR record 10147095*
+15. J. Costa, A. T. Adams, M. F. Jung, F. Guimbretière, and T. Choudhury, "EmotionCheck: A wearable device to regulate anxiety through false heart rate feedback," GetMobile, vol. 21, no. 2, pp. 22–25, 2017. doi:10.1145/3131214.3131222 (open access)
+16. M. de Witte, A. Spruit, S. van Hooren, X. Moonen, and G.-J. Stams, "Effects of music interventions on stress-related outcomes: A systematic review and two meta-analyses," Health Psychol. Rev., vol. 14, no. 2, pp. 294–324, 2020. doi:10.1080/17437199.2019.1627897 (Northeastern access)
+17. K. Starcke, J. Mayr, and R. von Georgi, "Emotion modulation through music after sadness induction—The iso principle in a controlled experimental study," Int. J. Environ. Res. Public Health, vol. 18, no. 23, p. 12486, 2021. doi:10.3390/ijerph182312486 (open access)
+18. Y. Koh, J. Kim, K. Lee, Y. Jung, H. Hong, and U. Lee, "Exploring data-driven approaches to stress management: A systematic review of stress tracking, intervention, and system evaluation methods," in Proc. CHI 2026. doi:10.1145/3772318.3791194 — *not yet indexed in LibKey; DOI from the authors' PDF, confirm in the ACM Digital Library*
+19. "Ride, Track, and Recover: Pilot randomized trial of a wearable digital self-management intervention during a veteran endurance-cycling program," arXiv:2606.13529 — *preprint, not peer-reviewed; no DOI*
+20. K. K. Jetelina, R. Molsberry, L. Malthaner, A. Beauchamp, M. B. Cannell, T. Hall, E. Fowler, and L. Anderson, "Acceptability of a real-time notification of stress and access to self-help therapies among law enforcement officers," BMC Public Health, vol. 22, p. 32, 2022. doi:10.1186/s12889-021-12423-y (open access)
+21. University of Twente bachelor's/master's theses on wearable stress feedback (2024–2025), e.g. essay.utwente.nl/essays/107074 — *student theses, not peer-reviewed; cite with caution*
 
 ## 5. Synthesis
 

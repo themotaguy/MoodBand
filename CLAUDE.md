@@ -46,7 +46,7 @@ Not yet done / in progress:
 1. **Feedback-decision module — next build step.** Plan drafted in
    `docs/feedback-module-plan.md`, backed by `docs/literature-review.md`
    §4b. Waiting on the user's answers to the plan's two open questions
-   before building. §4b citations still need verifying through LibKey.
+   before building. §4b citations verified through LibKey (Oct 15).
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
    participants, includes anger) requested on Harvard Dataverse; TILES-2018
    account approved but its data-use agreement needs Prof. Zantout's
@@ -134,6 +134,9 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
 
 ## Docs in this repo
 
+- `Docs/RitikMota_Capstone_LiteratureReview_mk2.pdf` and
+  `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf` — the authoritative
+  formal documents. The markdown docs below are working summaries of them.
 - `docs/literature-review.md` — the 10 reviewed papers, organized by theme,
   each with an explicit "why this shaped MoodBand" note; plus the sensor
   recommendation table and a condensed device comparison.

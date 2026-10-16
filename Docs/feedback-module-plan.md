@@ -29,10 +29,16 @@ Framed as a JITAI decision rule (Nahum-Shani et al.).
    - sad → iso-principle audio (calm first, then gradually brighter)
    - angry → calming timer (in catalog; model can't predict anger yet —
      decisions.md #7)
-   - happy / neutral → no interruption (see open question 1)
-6. **Channels by accessibility profile** (hard rules):
-   - visually impaired: always audio **and** haptic, never one alone ([10])
-   - sighted: visual + haptic by default
+   - happy / neutral → **no feedback** while the state continues (avoids
+     feedback fatigue)
+   - **recovery** (stressed / sad / angry → happy / neutral) → brief
+     positive-reinforcement cue — the only "positive" feedback
+6. **Channels by accessibility profile** — three profiles (hard rules):
+   - **blind / visually impaired**: always audio **and** haptic, never one
+     alone ([10])
+   - **low vision**: audio + haptic as above, plus optional high-contrast
+     visual cues
+   - **sighted**: visual + haptic by default
    - every visual cue has a non-visual equivalent and screen-reader text
    - audio unavailable (silent mode): visually impaired users still get
      haptic plus a deferred audio cue — never visual-only
@@ -68,11 +74,16 @@ JSON catalog so the same table works in a Python backend or the phone app
 - Risk: probabilities are flat; a strict threshold may rarely fire and a
   loose one is often wrong. That is a finding to report, not hide.
 
-## Open questions (need answers before building)
+## Resolved questions (Oct 15, 2026)
 
-1. **Happy/neutral feedback?** Proposal: green banner / brief chime, "no
-   interruption". These are ~70% of reports. Suggested: positive cue only on
-   recovery (stressed/sad → happy/neutral). Research found no support for
-   routine positive feedback.
-2. **Profiles: two or three?** Suggested adding **low vision** (audio +
-   haptic like visually impaired, plus optional high-contrast visual cues).
+1. **Happy/neutral feedback?** No feedback for a continuing happy/neutral
+   state (feedback fatigue). Positive reinforcement only on a transition
+   from a negative mood (stressed/sad/angry) to a positive one
+   (happy/neutral). Note: §4b found no direct evidence for recovery-based
+   reinforcement — it is a design choice motivated by alert-fatigue findings
+   (Koh et al. 2026), to be evaluated in the user trial.
+2. **Profiles: two or three?** Three: sighted, low vision, blind/visually
+   impaired.
+
+Next: user is updating the formal literature review (on claude.ai) to cover
+these feedback decisions before the module is built.

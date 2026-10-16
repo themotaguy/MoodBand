@@ -155,6 +155,62 @@ personalized per-participant models balanced acc ~0.39 (33 participants).
 
 ---
 
+## 8. Overnight HRV/sleep: not in the generalized model; optional for personalized
+
+**Decision** (Oct 15, 2026): the default (generalized) classifier uses only
+real-time features — heart rate, steps, time of day, and HR relative to the
+person's own average. Last night's HRV and sleep (from LifeSnaps' daily CSV)
+are kept in the code as an optional feature set
+(`FEATURE_SETS["realtime+overnight"]` in `model/lifesnaps.py`), in
+person-relative form only, for personalized models.
+
+**Why**: tested on LifeSnaps (2,040 labelled hours, 61 participants; last
+night's HRV available for 59% of them, sleep for 89%):
+- *Generalized* (participant-grouped 5-fold CV, repeated over 5 seeds,
+  balanced accuracy): real-time only **0.322** ± 0.007; + raw overnight
+  features 0.270; + person-relative overnight features 0.295. Overnight
+  features consistently *hurt* on unseen participants — absolute sleep/HRV
+  values mostly encode who the person is, not their mood.
+- *Personalized* (per-participant chronological 70/30, 33 participants,
+  5 seeds): real-time 0.384 → + overnight 0.419 (+0.035; 17 improved, 10
+  worse, Wilcoxon p ≈ 0.10). Suggestive, not conclusive.
+
+This refines rather than contradicts §3 (HRV as a supplementary overnight
+signal): the signal may matter per person, but not across people. Revisit
+with MoodBand's own trial data, where each user's baseline is available.
+
+---
+
+## 9. Classify from the 30 minutes before each mood report (minute-level HR)
+
+**Decision** (Oct 15, 2026): the model is trained on heart-rate and step
+features from the **30 minutes before each mood report**, built from the
+LifeSnaps MongoDB dump, instead of the hourly CSV. Pipeline:
+`model/extract_lifesnaps_mongo.py` (one-off, streams the 9.7 GB
+`fitbit.bson` into minute-level files) → `model/windows.py` (features) →
+`model/train_baseline.py`.
+
+**Why**:
+- *Matches deployment*: the app will classify from the user's last N minutes
+  of Fitbit data (Google Health API, 5-second HR), not from hourly averages.
+- *Exact timing*: the dump has each SEMA3 response's completion minute and
+  heart rate every few seconds (~49M readings → 5.5M minutes; readings with
+  confidence 0 dropped). The hourly CSV only knows the report's hour.
+- *Verified alignment*: minute HR re-aggregated to hours reproduces the CSV's
+  `bpm` exactly (median diff 0.00 bpm), and SEMA3 completion hours match the
+  CSV's labelled hours for 99.7% of responses — same local clock, no offset.
+- *Slightly better*: participant-grouped CV, 5 seeds, balanced accuracy:
+  hourly CSV 0.322 ± 0.011; 10-min window 0.330; **30-min 0.334 ± 0.005**;
+  60-min 0.315; 120-min 0.314. "Sad" F1 rises from ~0.08 to ~0.13.
+
+**Caveat**: the gain is real but small — heart rate + steps carry limited
+mood signal across people, whatever the resolution. Single-run numbers
+(especially personalized, 33 participants with few test labels each) move
+by several points between seeds and scikit-learn versions; compare
+multi-seed averages.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it
@@ -166,6 +222,8 @@ personalized per-participant models balanced acc ~0.39 (33 participants).
   deferring "angry" (Decision #7) acceptable given Objective 3 lists five
   classes? If anger must be in scope, which source — PMData, MoodBand's own
   trial (with an anger-inducing stimulus added to the protocol), or merging
-  it into "stressed"?
+  it into "stressed"? Note: the raw SEMA3 data contains **2 "ANGER"**
+  responses (plus 2 Surprise, 2 Sadness, 1 Fear, 1 Joy — apparently a
+  different survey version), far too few to train on.
 - [ ] (Informational, not blocking) Prof. Zantout was checking with Dr. Yoon
   about a possibly related wearable project elsewhere on campus.

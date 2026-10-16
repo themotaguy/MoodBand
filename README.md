@@ -64,6 +64,8 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 | 5 | Offline-first build order | Validate model, feedback, and app on public datasets before live Fitbit integration |
 | 6 | Random Forest as primary classifier | Best classical model on wearable features in the reviewed literature; lightweight. Personalized models evaluated alongside a generalized one. |
 | 7 | **"Angry" deferred; classifier is 4-class for now** | The primary dataset (LifeSnaps) has no anger label. To be discussed with the supervisor. |
+| 8 | Overnight HRV/sleep kept out of the generalized model; optional for personalized | Lowered accuracy on unseen participants; small, not-yet-significant gain per person |
+| 9 | Classify from the **30 minutes of heart rate + steps before each mood report** | Matches how the app will run on live data; slightly better than hourly averages |
 
 ## Project status
 
@@ -74,7 +76,9 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 - [x] Training datasets identified — [Docs/datasets.md](Docs/datasets.md)
 - [x] LifeSnaps dataset acquired; exploratory analysis done
 - [x] First Random Forest mood-classification baseline
-- [ ] Improve the classifier (overnight HRV/sleep features, PMData cross-dataset check)
+- [x] Overnight HRV/sleep features evaluated (Decision #8)
+- [x] Minute-level heart rate from the LifeSnaps MongoDB dump (Decision #9)
+- [ ] Improve the classifier further (PMData cross-dataset check)
 - [ ] Feedback-decision module
 - [ ] Mobile companion app (accessible, screen-reader compatible)
 - [ ] Offline end-to-end integration
@@ -83,18 +87,20 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 
 ## Results so far
 
-Trained on **LifeSnaps** (Fitbit Sense, 71 participants), using hourly heart rate, steps, and time of day.
+Trained on **LifeSnaps** (Fitbit Sense, 71 participants). Self-reported moods are mapped Happy, Neutral, Sad → same; Tense/Anxious → stressed. Each mood report gets heart-rate and step features from the **30 minutes before it** (minute-level data from the LifeSnaps MongoDB dump).
 
-After mapping its self-reported moods (Happy, Neutral, Sad → same; Tense/Anxious → stressed), there are **2,040 labelled hours from 61 participants**: neutral 36%, happy 32%, stressed 26%, sad 6%.
+There are **1,961 usable reports from 61 participants**: neutral 36%, happy 32%, stressed 26%, sad 7%.
 
-| Model | Balanced accuracy | Macro-F1 |
+Balanced accuracy, averaged over 5 repeated participant-grouped splits (chance = 0.25):
+
+| Model | Generalized (unseen participants) | Personalized (33 participants) |
 |---|---|---|
-| Chance (4 classes) | 0.25 | — |
-| Majority-class baseline | 0.25 | 0.13 |
-| Random Forest, generalized (tested on unseen participants) | 0.31 | 0.30 |
-| Random Forest, personalized (33 participants with ≥20 labels) | ~0.39 | — |
+| Majority-class baseline | 0.25 | — |
+| Random Forest, hourly CSV averages | 0.32 | ~0.37–0.39 |
+| Random Forest, hourly + last night's HRV/sleep | 0.27–0.30 | ~0.42 |
+| **Random Forest, 30 min before report** | **0.33** | ~0.38–0.39 |
 
-An early baseline: better than chance, with personalized models ahead of the generalized one. "Sad" is rarely detected, as it has only 131 examples. Hourly-averaged heart rate is the likely main limitation.
+An early baseline: consistently better than chance, but heart rate and steps carry limited mood signal across people. Personalized models do better, but with few test labels per person their numbers vary by several points between runs. "Sad" remains hardest (F1 ≈ 0.13). See Decisions #8–#9 for detail.
 
 ## Repository structure
 
@@ -103,7 +109,9 @@ An early baseline: better than chance, with personalized models ahead of the gen
 ├── Docs/                     # Decisions log, literature review, proposal summary,
 │                             # dataset notes, weekly reports (PDF)
 ├── model/
-│   ├── lifesnaps.py          # Data loading, mood-label mapping, feature engineering
+│   ├── lifesnaps.py          # Hourly/daily CSV loading, mood-label mapping, features
+│   ├── extract_lifesnaps_mongo.py  # One-off: MongoDB dump → minute-level HR/steps
+│   ├── windows.py            # Features from the 30 min before each mood report
 │   ├── explore_lifesnaps.py  # Exploratory data analysis
 │   ├── train_baseline.py     # Random Forest training + evaluation
 │   └── requirements.txt
@@ -116,13 +124,15 @@ The `app/` (mobile companion app) and `sensing/` (Google Health API integration)
 
 ## Getting started (model)
 
-1. Download LifeSnaps from Zenodo (DOI [`10.5281/zenodo.6826682`](https://doi.org/10.5281/zenodo.6826682)). Place `hourly_fitbit_sema_df_unprocessed.csv` and `daily_fitbit_sema_df_unprocessed.csv` in `data/lifesnaps/`.
-2. Install dependencies and run:
+1. Download LifeSnaps from Zenodo (DOI [`10.5281/zenodo.6826682`](https://doi.org/10.5281/zenodo.6826682)). Place `hourly_fitbit_sema_df_unprocessed.csv` and `daily_fitbit_sema_df_unprocessed.csv` in `data/lifesnaps/`. Keep the `mongo_rais_anonymized/` dump folder (~9.7 GB) anywhere; `data/lifesnaps/mongo/` is the default location.
+2. Set up the environment and run:
 
 ```bash
-pip install -r model/requirements.txt
-python3 model/explore_lifesnaps.py   # dataset summary + label coverage
-python3 model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
+python3 -m venv .venv
+.venv/bin/pip install -r model/requirements.txt
+.venv/bin/python model/extract_lifesnaps_mongo.py path/to/mongo_rais_anonymized  # one-off, ~3 min
+.venv/bin/python model/explore_lifesnaps.py   # dataset summary + label coverage
+.venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
 ```
 
 ## Tech stack

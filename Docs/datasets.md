@@ -22,6 +22,13 @@ This is the exact dataset behind literature-review paper [4]
   (`daily_fitbit_sema_df_unprocessed.csv`,
   `hourly_fitbit_sema_df_unprocessed.csv`), or a full MongoDB dump for
   finer-grained/raw data
+- **MongoDB dump (in use since Oct 15, 2026)**: `fitbit.bson` (~9.7 GB;
+  heart rate every few seconds with a confidence value, per-minute steps,
+  plus calories, distance, SpO2 variation, exercise logs), `sema.bson` (each
+  SEMA3 response with its exact completion timestamp, mood, and place), and
+  `surveys.bson`. No MongoDB server needed —
+  `model/extract_lifesnaps_mongo.py` streams it with pymongo's `bson`
+  module into minute-level CSVs under `data/lifesnaps/` (see decisions.md #9)
 - **Why this is the priority dataset**: same device family as MoodBand's
   chosen wearable, same paper already cited in the lit review, and real
   validated mood labels (PANAS/STAI) rather than just activity data

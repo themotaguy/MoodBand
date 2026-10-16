@@ -3,8 +3,9 @@
 Expected input: hourly_fitbit_sema_df_unprocessed.csv (see Docs/datasets.md),
 placed under data/lifesnaps/.
 
-Feature policy follows Docs/decisions.md §3: only heart rate + motion are used
-as real-time (waking-state) features. HRV is overnight-only and is NOT used here.
+Feature policy follows Docs/decisions.md §3: heart rate + motion are the
+real-time (waking-state) features; HRV and sleep enter only as last night's
+values, joined from daily_fitbit_sema_df_unprocessed.csv.
 """
 
 from pathlib import Path
@@ -14,6 +15,7 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_HOURLY_CSV = REPO_ROOT / "data" / "lifesnaps" / "hourly_fitbit_sema_df_unprocessed.csv"
+DEFAULT_DAILY_CSV = REPO_ROOT / "data" / "lifesnaps" / "daily_fitbit_sema_df_unprocessed.csv"
 
 MOODBAND_CLASSES = ["happy", "neutral", "sad", "stressed", "angry"]
 
@@ -38,7 +40,7 @@ def load_hourly(path=DEFAULT_HOURLY_CSV):
     if not path.exists():
         raise FileNotFoundError(
             f"{path} not found. Download LifeSnaps (Zenodo DOI 10.5281/zenodo.6826682) "
-            "and place the hourly CSV there — see Docs/datasets.md."
+            "and place the CSVs there — see Docs/datasets.md."
         )
     df = pd.read_csv(path, low_memory=False)
     df.columns = [c.strip() for c in df.columns]
@@ -86,11 +88,47 @@ def add_features(df):
     return out
 
 
-FEATURES = RAW_FEATURES + ["bpm_rel", "bpm_z", "hour_sin", "hour_cos"]
+REALTIME_FEATURES = RAW_FEATURES + ["bpm_rel", "bpm_z", "hour_sin", "hour_cos"]
+
+# Supplementary overnight signals (decisions.md §3) from the daily CSV. Fitbit
+# dates sleep and HRV by the morning the sleep ends, so the row for date D
+# describes the night before D and is already known during D's waking hours.
+# Skin temperature / SpO2 / Fitbit stress score are left out (§3: not assumed
+# to be exposed by the API).
+OVERNIGHT_RAW = ["rmssd", "nremhr", "sleep_duration", "sleep_efficiency",
+                 "sleep_deep_ratio", "sleep_rem_ratio"]
+# Only person-relative forms are used: absolute sleep/HRV values mostly identify
+# *who* someone is and hurt generalization to unseen participants (decisions.md #8).
+# sleep_deep_ratio / sleep_rem_ratio are already relative to the person's baseline.
+OVERNIGHT_FEATURES = ["rmssd_rel", "nremhr_rel", "sleep_duration_rel",
+                      "sleep_efficiency_rel", "sleep_deep_ratio", "sleep_rem_ratio"]
+
+FEATURE_SETS = {
+    "realtime": REALTIME_FEATURES,
+    "realtime+overnight": REALTIME_FEATURES + OVERNIGHT_FEATURES,
+}
+FEATURES = REALTIME_FEATURES + OVERNIGHT_FEATURES + [
+    c for c in OVERNIGHT_RAW if c not in OVERNIGHT_FEATURES]
 
 
-def labelled_dataset(path=DEFAULT_HOURLY_CSV):
-    """(X, y, groups, df) for rows with a usable mood label and a heart-rate reading."""
+def add_overnight_features(df, daily_path=DEFAULT_DAILY_CSV):
+    """Join last night's HRV/sleep onto each hourly row; missing nights stay NaN."""
+    daily = load_hourly(daily_path)[["id", "date"] + OVERNIGHT_RAW]
+    for c in OVERNIGHT_RAW:
+        daily[c] = pd.to_numeric(daily[c], errors="coerce")
+    # 0 is not a physiological HRV / sleeping-HR value; Fitbit uses it for "no reading".
+    daily[["rmssd", "nremhr"]] = daily[["rmssd", "nremhr"]].replace(0, np.nan)
+    for c in ("rmssd", "nremhr", "sleep_duration", "sleep_efficiency"):
+        daily[f"{c}_rel"] = daily[c] - daily.groupby("id")[c].transform("mean")
+    return df.merge(daily, on=["id", "date"], how="left", validate="many_to_one")
+
+
+def labelled_dataset(path=DEFAULT_HOURLY_CSV, daily_path=DEFAULT_DAILY_CSV):
+    """(X, y, groups, df) for rows with a usable mood label and a heart-rate reading.
+
+    X holds every feature; select a FEATURE_SETS entry to train on a subset.
+    """
     df = add_features(add_mood_label(load_hourly(path)))
+    df = add_overnight_features(df, daily_path)
     df = df[df["mood"].notna() & df["bpm"].notna()].reset_index(drop=True)
     return df[FEATURES], df["mood"], df["id"], df

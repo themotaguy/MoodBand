@@ -1,11 +1,26 @@
 # Project Proposal — Summary
 
-Condensed from the full proposal, **`Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf`**
-(authoritative; if the two disagree, the PDF wins). Note: the proposal's
-Table 4 and §7.3 predate the feedback-module decisions in
-`feedback-module-plan.md` (three profiles; no happy/neutral feedback;
-iso-principle audio for sadness). This summary is what Claude
-Code needs day-to-day; go to the full doc for formal/submission purposes.
+Condensed from the full proposal, `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf`.
+
+> **Historical document — not kept up to date.** The proposal records the
+> project's original goal and direction (Oct 2026). It is deliberately *not*
+> revised as the project evolves (decided Oct 18, 2026); changes are
+> recorded in `decisions.md`, weekly reports, and the final report's
+> "changes from the proposal" section. **Where this file disagrees with
+> `decisions.md` or `feedback-module-plan.md`, those win** — don't change
+> code to match the proposal.
+>
+> Known divergences so far:
+> - 4 mood classes, not 5 — "angry" deferred (decisions.md #7).
+> - Overnight HRV not used in the generalized model (decisions.md #8).
+> - Features from the 30 min before each report (decisions.md #9).
+> - Datasets: LifeSnaps primary; PMData dropped (#10); EmoPhone/TILES pending.
+>   No Apple Watch datasets.
+> - Feedback mapping (Table 4 / §7.3, reproduced below) is superseded by
+>   `feedback-module-plan.md`: three accessibility profiles, no feedback for
+>   continuing happy/neutral, positive cue only on recovery, breathing pacer
+>   for stress, iso-principle music for sadness, JITAI-style guardrails.
+> - Evaluation uses balanced accuracy / macro-F1, not plain accuracy.
 
 ## Aim
 
@@ -62,7 +77,7 @@ Phase 1): volunteer participants exposed to mood-inducing stimuli (calming
 music, stressful timed tasks, neutral video) while Fitbit signals are logged
 and self-reported mood is collected as ground truth.
 
-## Feedback mapping (illustrative, from the proposal's Table 1/4)
+## Feedback mapping (original proposal, Table 4 — superseded, see `feedback-module-plan.md`)
 
 | Mood Detected | Sighted Users | Visually Impaired Users |
 |---|---|---|

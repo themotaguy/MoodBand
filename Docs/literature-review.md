@@ -1,10 +1,14 @@
 # Literature Review
 
-> **Authoritative version: `Docs/RitikMota_Capstone_LiteratureReview_mk2.pdf`.**
-> This file is a working summary for Claude Code. Its §1–4 and §6–7 match
-> mk2 (same references [1]–[10]). §4b is newer research (Oct 15, 2026)
-> being written into the formal review as a new §5. If this file and the
-> PDF disagree, the PDF wins.
+> **Authoritative version: `Docs/RitikMota_Capstone_LiteratureReview_mk5.pdf`**
+> (final, Oct 18, 2026). This file is a working summary for Claude Code. Its
+> §1–4 match mk5 §1–4. §4b here is the draft of mk5's **§5
+> "Mood-Regulation Interventions and Feedback Delivery"**; mk5 §5 supersedes
+> it — it adds [22] Miri et al. (PIV design study, TOCHI 2020) and [23]
+> Lowe-Brown et al. (iso principle, no advantage after anxiety induction,
+> Musicae Scientiae 2026), replaces [21] with a single thesis (van Oostrum
+> 2024), and corrects [8] and [10]. If this file and the PDF disagree, the
+> PDF wins.
 
 Ten papers, reviewed across four themes. Each theme ends with an explicit
 note on how it shaped MoodBand's design — not just a summary of findings.

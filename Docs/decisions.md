@@ -261,5 +261,9 @@ inside logged main sleep vs. 35% if left in UTC.
   hospital workers, 10 weeks, semi-daily affect/anxiety/stress self-reports
   — backup/additional training data while EmoPhone access is pending (see
   `datasets.md`). Only the main data record is needed, not the audio record.
+- [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: does the
+  course require a revised proposal? Current plan (Oct 18): keep the mk2
+  proposal as a historical record and document changes in weekly reports
+  and a "changes from the proposal" section of the final report.
 - [ ] (Informational, not blocking) Prof. Zantout was checking with Dr. Yoon
   about a possibly related wearable project elsewhere on campus.

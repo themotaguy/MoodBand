@@ -43,10 +43,9 @@ Done:
   the project venv: `.venv/bin/python model/train_baseline.py`.
 
 Not yet done / in progress:
-1. **Feedback-decision module — next build step.** Plan drafted in
-   `docs/feedback-module-plan.md`, backed by `docs/literature-review.md`
-   §4b. Waiting on the user's answers to the plan's two open questions
-   before building. §4b citations verified through LibKey (Oct 15).
+1. **Feedback-decision module — next build step, ready to start.** Plan is
+   final in `docs/feedback-module-plan.md` (open questions resolved Oct 15);
+   evidence is §5 of the final literature review (mk5, Oct 18).
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
    participants, includes anger) requested on Harvard Dataverse; TILES-2018
    account approved but its data-use agreement needs Prof. Zantout's
@@ -115,7 +114,8 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
   being solid.
 - **Accessibility is a core requirement, not a stretch goal.** Every visual
   feedback cue needs a corresponding audio or haptic equivalent — see the
-  mood-to-feedback mapping table in `docs/proposal-summary.md`. This was
+  three accessibility profiles in `docs/feedback-module-plan.md` (the
+  proposal's original mapping table is superseded). This was
   directly informed by user research in the lit review showing screen
   readers don't reliably work in practice (paper [10]).
 
@@ -134,18 +134,22 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
 
 ## Docs in this repo
 
-- `Docs/RitikMota_Capstone_LiteratureReview_mk2.pdf` and
-  `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf` — the authoritative
-  formal documents. The markdown docs below are working summaries of them.
+- `Docs/RitikMota_Capstone_LiteratureReview_mk5.pdf` — the final, authoritative
+  literature review (earlier mk2–mk4 are superseded drafts).
+- `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf` — the original proposal,
+  kept as a **historical** record of the starting goal; deliberately not
+  updated as the project evolves. Where it disagrees with `docs/decisions.md`
+  or `docs/feedback-module-plan.md`, those win.
 - `docs/literature-review.md` — the 10 reviewed papers, organized by theme,
   each with an explicit "why this shaped MoodBand" note; plus the sensor
   recommendation table and a condensed device comparison.
 - `docs/decisions.md` — ADR-style log of the big decisions (device, sensors,
   architecture flexibility, build ordering) and the reasoning behind each.
-- `docs/proposal-summary.md` — condensed version of the full project
-  proposal: aim, scope, methodology phases, feedback-mapping table, timeline.
-- `docs/feedback-module-plan.md` — draft plan for the feedback-decision
-  module (next build step), with open questions awaiting the user.
+- `docs/proposal-summary.md` — condensed version of the original proposal
+  (historical), with a list of where the project has since diverged.
+- `docs/feedback-module-plan.md` — final plan for the feedback-decision
+  module (next build step): decision steps, three accessibility profiles,
+  feedback catalog, evaluation.
 - `docs/datasets.md` — candidate training datasets (LifeSnaps, PMData, and
   others considered), what each contains, and how to get them.
 

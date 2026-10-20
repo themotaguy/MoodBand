@@ -67,6 +67,7 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 | 8 | Overnight HRV/sleep kept out of the generalized model; optional for personalized | Lowered accuracy on unseen participants; small, not-yet-significant gain per person |
 | 9 | Classify from the **30 minutes of heart rate + steps before each mood report** | Matches how the app will run on live data; slightly better than hourly averages |
 | 10 | PMData not used; cross-dataset check inconclusive | Its daily, mostly post-wake 1–5 scores show no link to heart rate/steps even for a PMData-trained model; validation will come from MoodBand's own trial |
+| 11 | Feedback module acts on ~1 suggestion a day (confidence ≥ 0.45, persistence, cooldown, cap, exercise filter); three accessibility profiles | Simulation: stricter thresholds cut interruptions but not errors — "stressed" interventions match the reported mood ~1 in 3 times (chance 1 in 4) |
 
 ## Project status
 
@@ -80,7 +81,8 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 - [x] Overnight HRV/sleep features evaluated (Decision #8)
 - [x] Minute-level heart rate from the LifeSnaps MongoDB dump (Decision #9)
 - [x] PMData cross-dataset check — inconclusive (Decision #10)
-- [ ] Feedback-decision module
+- [x] Literature review extended with intervention and feedback-timing research (final: mk5)
+- [x] Feedback-decision module, tuned by simulation (Decision #11)
 - [ ] Mobile companion app (accessible, screen-reader compatible)
 - [ ] Offline end-to-end integration
 - [ ] Google Health API integration (confirm 5-second HR, overnight-only HRV, OAuth on Android and iOS)
@@ -120,12 +122,18 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── explore_lifesnaps.py  # Exploratory data analysis
 │   ├── train_baseline.py     # Random Forest training + evaluation
 │   └── requirements.txt
+├── feedback/
+│   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
+│   ├── decision.py           # Decision rule: mood prediction + profile → intervention or nothing
+│   ├── simulate.py           # Replays held-out predictions to tune the confidence threshold
+│   └── tests/                # Guardrail and accessibility tests
+├── app/                      # React Native (Expo) companion app — haptics prototype so far
 ├── data/                     # Datasets (gitignored — download separately)
 ├── CLAUDE.md                 # Project context for Claude Code
 └── README.md
 ```
 
-The `app/` (mobile companion app) and `sensing/` (Google Health API integration) directories will be added as those phases begin.
+The `sensing/` directory (Google Health API integration) will be added when that phase begins.
 
 ## Getting started (model)
 
@@ -140,13 +148,15 @@ python3 -m venv .venv
 .venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
 .venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
+.venv/bin/python -m unittest discover -s feedback/tests -t .   # feedback module tests
+.venv/bin/python feedback/simulate.py         # feedback simulation (~5 min first run, then cached)
 ```
 
 ## Tech stack
 
 - **Wearable integration:** Google Health API (REST/OAuth, cloud-based)
 - **ML:** Python, pandas, scikit-learn (Random Forest); TensorFlow Lite considered for on-device inference
-- **Mobile app:** Flutter or React Native (cross-platform, strong screen-reader support) — to be decided
+- **Mobile app:** React Native with Expo (development build); haptics via react-native-haptic-feedback (Core Haptics on iOS)
 - **Storage:** on-device buffer + Firebase sync for mood history
 - **Optional backend:** Firebase Cloud Functions, if on-device inference proves too heavy
 

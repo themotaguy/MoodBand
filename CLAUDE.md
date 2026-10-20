@@ -43,9 +43,14 @@ Done:
   the project venv: `.venv/bin/python model/train_baseline.py`.
 
 Not yet done / in progress:
-1. **Feedback-decision module — next build step, ready to start.** Plan is
-   final in `docs/feedback-module-plan.md` (open questions resolved Oct 15);
-   evidence is §5 of the final literature review (mk5, Oct 18).
+1. **Feedback-decision module — built (Oct 18).** `feedback/`: catalog,
+   decision rule, simulation, 23 tests (`python -m unittest discover -s
+   feedback/tests -t .`). Default threshold 0.45 from simulation; key finding:
+   model confidence doesn't track correctness (`docs/decisions.md` #11).
+   **Next build step: the mobile companion app** — React Native / Expo
+   development build in `app/` (decisions.md #12); testing is on the user's
+   iPhone. First milestone: haptics prototype (`app/App.tsx`), test plan in
+   `docs/haptics-prototype-test.md`. Follow `app/AGENTS.md` for Expo work.
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
    participants, includes anger) requested on Harvard Dataverse; TILES-2018
    account approved but its data-use agreement needs Prof. Zantout's
@@ -126,8 +131,9 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
 - **ML**: Python, scikit-learn (Random Forest is the literature-backed
   starting point — see `docs/literature-review.md`, paper [6]) / TensorFlow
   Lite for lightweight inference
-- **Mobile app**: Flutter or React Native (cross-platform from one
-  codebase; needs good accessibility/screen-reader widget support)
+- **Mobile app**: React Native with Expo (development build, not Expo Go);
+  haptics via react-native-haptic-feedback (Core Haptics on iOS) — see
+  `docs/decisions.md` #12
 - **Data storage**: Local on-device buffer + Firebase sync for mood history
 - **Optional backend**: Firebase Cloud Functions, if on-device inference
   proves too heavy

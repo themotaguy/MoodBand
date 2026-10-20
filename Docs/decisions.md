@@ -241,11 +241,100 @@ inside logged main sleep vs. 35% if left in UTC.
 
 ---
 
+## 11. Feedback-decision module built; default confidence threshold 0.45
+
+**Decision** (Oct 18, 2026): the feedback-decision module is implemented in
+`feedback/` as designed in `feedback-module-plan.md` (JITAI-style rule:
+confidence gate → exercise filter → persistence → snooze / quiet hours /
+daily cap / cooldown; no feedback for continuing happy/neutral; recovery cue
+on negative → positive; three accessibility profiles enforced on the
+catalog). Default `min_confidence` = **0.45** (margin 0.10, 2-of-3
+persistence, 30-min cooldown, cap 4/day).
+
+**Why 0.45** — `feedback/simulate.py` replays held-out predictions
+(participant-grouped 5-fold CV) every 10 min from 08:00–22:00 on 1,295
+LifeSnaps report days (~101k predictions):
+
+| min_confidence | interventions / person-day | days with any | stressed precision (n) |
+|---|---|---|---|
+| 0.40 | 2.09 | 79% | 0.36 (290) |
+| 0.45 | 1.18 | 57% | 0.32 (168) |
+| 0.50 | 0.45 | 29% | 0.36 (59) |
+| 0.55 | 0.11 | 9% | 0.31 (16) |
+
+Chance precision for "stressed" is 0.26 (its share of reports). Precision
+(an intervention within 30 min of a report of the same mood) stays ~0.31–0.37
+at every threshold: **the classifier's confidence does not track
+correctness**, so the threshold controls how often MoodBand speaks up, not
+how often it is right. 0.45 gives about one intervention a day, under the
+daily cap. "Sad" has too few matched cases (≤42) to judge; recall is low
+(≤21% for stressed). With roughly two in three interventions not matching
+the reported mood, suggestion framing and the "Was this right?" prompt are
+essential, and those answers (personalized labels) are the main route to
+improving precision.
+
+---
+
+## 12. Mobile app: React Native (Expo development build), tested on iPhone
+
+**Decision** (Oct 19, 2026): the companion app uses **React Native with Expo**,
+built as a *development build* (not Expo Go, which can't load custom native
+modules). Haptics via **react-native-haptic-feedback** (`triggerPattern` with
+continuous events of set duration and intensity; Core Haptics on iOS,
+`VibrationEffect.createWaveform` amplitudes on Android). All device testing
+is on the user's **iPhone**.
+
+**Why**: accessibility is the core requirement and the user trial includes
+blind and low-vision VoiceOver users. React Native renders native UIKit
+controls, so VoiceOver behaves as in any iPhone app; Flutter draws its own
+widgets behind a synthetic accessibility tree. A comparison of both
+(Perinello & Gaggi, Univ. of Padua) found neither accessible by default but
+React Native's accessible code more concise. Haptics are feasible in both
+(Flutter: `haptic_kit`); React Native's library is more established. Close
+call; Flutter's main advantage was a simpler toolchain.
+
+**Risk to check in the prototype**: whether `triggerPattern` renders
+*intensity* changes within continuous events on iPhone (the breathing
+pacer's gentle-inhale / strong-exhale contrast). Fallback: a small Swift
+Expo module calling Core Haptics directly.
+
+---
+
+## 13. Phone haptics only work in the hand: interventions start with a notification
+
+**Finding** (Oct 19, 2026, iPhone 15 Pro Max test, `haptics-prototype-test.md`
+A4): the breathing pacer is clear and calming **while the phone is held**,
+barely noticeable on a table (quiet room, no case), and **not noticeable in a
+pocket**. This confirms the caveat in lit review §5: the vibrotactile
+evidence ([14], [15], [22]) used body-worn devices, and a phone's motor does
+not carry the same patterns through a pocket. Separately, iOS stops an app's
+custom Core Haptics when it is in the background, so the app could not play
+a pattern unprompted anyway.
+
+**Decision**: automatic interventions are delivered in two steps.
+1. **Prompt**: a notification carrying the suggestion text ("Want a 1-minute
+   breathing break?") with the system notification sound/vibration. VoiceOver
+   reads notifications aloud, so this works for blind and low-vision users.
+2. **Session**: the haptic pattern (and audio/visual cues) plays only once
+   the user opens the notification, i.e. with the phone in hand.
+Silent haptic-only nudges (e.g. the recovery cue's double tap) can't rely on
+being felt; the recovery cue becomes a quiet notification or is shown the
+next time the app is opened.
+
+**Open**: whether the Fitbit itself could vibrate on the wrist (where the
+evidence says haptics work best) through the Google Health API. Not
+supported as far as known; check during the API prototype (Open items).
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it
   really provide 5-second HR resolution with no approval step? Is HRV still
   overnight-only, or has that changed? (Ties to Decision #2 and #3.)
+- [ ] Check whether the Google Health API (or any Fitbit interface) can trigger a
+  vibration on the wrist — would let haptics work without the phone in hand
+  (Decision #13).
 - [ ] Confirm OAuth/auth flow end-to-end for the Google Health API works
   from both an Android and an iOS client.
 - [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: is

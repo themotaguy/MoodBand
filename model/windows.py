@@ -56,20 +56,24 @@ def window_features(reports, hr_by_id, steps_by_id, window_min=30):
     in the window are dropped. Shared by LifeSnaps and PMData (pmdata.py).
     """
     window = pd.Timedelta(minutes=window_min)
+    person_stats = {}
     rows = []
     for r in reports.to_dict("records"):
         hr = hr_by_id.get(r["id"])
         if hr is None:
             continue
         ts = r["ts"]
-        person_mean, person_std = hr["bpm_mean"].mean(), hr["bpm_mean"].std()
+        if r["id"] not in person_stats:
+            person_stats[r["id"]] = (hr["bpm_mean"].mean(), hr["bpm_mean"].std())
+        person_mean, person_std = person_stats[r["id"]]
         lo, hi = hr["minute"].searchsorted([ts - window, ts], side="right")
         w = hr.iloc[lo:hi]
         if len(w) < MIN_COVERAGE * window_min:
             continue
         t = (w["minute"] - ts).dt.total_seconds().to_numpy() / 60
         st = steps_by_id.get(r["id"], pd.Series(dtype=float))
-        st = st[(st.index > ts - window) & (st.index <= ts)]
+        lo, hi = st.index.searchsorted([ts - window, ts], side="right")
+        st = st.iloc[lo:hi]
         hr_mean = w["bpm_mean"].mean()
         rows.append({
             **r,

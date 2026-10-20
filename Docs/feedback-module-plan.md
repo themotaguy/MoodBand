@@ -1,4 +1,8 @@
-# Feedback-Decision Module — Plan (draft, not yet started)
+# Feedback-Decision Module — Plan
+
+> **Status (Oct 18, 2026): built** in `feedback/` — `decision.py`,
+> `interventions.json`, `simulate.py`, `tests/` (23 tests). Default threshold
+> and simulation results: `decisions.md` #11.
 
 Drafted Oct 15, 2026. Evidence: `literature-review.md` §4b. Once the open
 questions below are answered and the module is built, record the design as

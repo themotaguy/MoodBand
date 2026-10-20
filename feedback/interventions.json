@@ -1,0 +1,290 @@
+{
+  "version": 1,
+  "notes": "Feedback catalog for the decision module (decision.py). Design and evidence: Docs/feedback-module-plan.md and §5 of the literature review (mk5). Haptic patterns are segment lists of {ms, amplitude 0-255, optional type 'transient' = a single crisp tap at the segment start}, repeated `repeat` times; the app maps them to Android VibrationEffect waveforms / iOS Core Haptics intensity. Amplitudes raised Oct 19, 2026 after the first iPhone 15 Pro Max test: 50/255 was too faint to notice, so the floor is ~100 and strong phases use 255.",
+  "moods": {
+    "stressed": "breathing_break",
+    "sad": "iso_music",
+    "angry": "calming_timer",
+    "recovery": "recovery_cue"
+  },
+  "on_demand": "breathing_break",
+  "confirmation": {
+    "question": "Was this right?",
+    "options": [
+      "yes",
+      "no",
+      "snooze"
+    ]
+  },
+  "haptic_patterns": {
+    "breathing_pacer": {
+      "description": "Slow breathing at 6 breaths/min for 1 minute: gentle 4 s inhale, strong 6 s exhale (strong-exhale-phased, Miri et al. [14], [22]).",
+      "segments": [
+        {
+          "ms": 4000,
+          "amplitude": 100
+        },
+        {
+          "ms": 6000,
+          "amplitude": 255
+        }
+      ],
+      "repeat": 6
+    },
+    "slow_heartbeat": {
+      "description": "Heartbeat-like 'lub-dub' at 60 bpm for 1 minute (EmotionCheck, Costa et al. [15]): two crisp taps per beat. Alternative to breathing_pacer.",
+      "segments": [
+        {
+          "ms": 250,
+          "amplitude": 255,
+          "type": "transient"
+        },
+        {
+          "ms": 750,
+          "amplitude": 180,
+          "type": "transient"
+        }
+      ],
+      "repeat": 60
+    },
+    "descending_pulses": {
+      "description": "Pulses that fade from strong to faint over 10 s (graduated vibration, Jiang et al. [9]); repeated through a 2-minute pause.",
+      "segments": [
+        {
+          "ms": 500,
+          "amplitude": 255
+        },
+        {
+          "ms": 500,
+          "amplitude": 0
+        },
+        {
+          "ms": 500,
+          "amplitude": 215
+        },
+        {
+          "ms": 500,
+          "amplitude": 0
+        },
+        {
+          "ms": 500,
+          "amplitude": 175
+        },
+        {
+          "ms": 500,
+          "amplitude": 0
+        },
+        {
+          "ms": 500,
+          "amplitude": 135
+        },
+        {
+          "ms": 500,
+          "amplitude": 0
+        },
+        {
+          "ms": 500,
+          "amplitude": 100
+        },
+        {
+          "ms": 1500,
+          "amplitude": 0
+        }
+      ],
+      "repeat": 12
+    },
+    "soft_tap": {
+      "description": "Single gentle tap to accompany a non-haptic intervention.",
+      "segments": [
+        {
+          "ms": 120,
+          "amplitude": 130
+        }
+      ],
+      "repeat": 1
+    },
+    "double_tap": {
+      "description": "Two light taps for the recovery cue.",
+      "segments": [
+        {
+          "ms": 80,
+          "amplitude": 150
+        },
+        {
+          "ms": 120,
+          "amplitude": 0
+        },
+        {
+          "ms": 80,
+          "amplitude": 150
+        }
+      ],
+      "repeat": 1
+    }
+  },
+  "interventions": {
+    "breathing_break": {
+      "prompt": "Want a 1-minute breathing break?",
+      "alternatives": {
+        "haptic": "slow_heartbeat",
+        "audio": {
+          "type": "music",
+          "playlist": "calming",
+          "description": "Calming music (de Witte et al. [16])."
+        }
+      },
+      "profiles": {
+        "sighted": {
+          "visual": {
+            "colour": "#4A7FD6",
+            "animation": "breathing_circle",
+            "high_contrast": false,
+            "screen_reader_text": "Breathing guide: breathe in for 4 seconds, out for 6 seconds."
+          },
+          "haptic": "breathing_pacer"
+        },
+        "low_vision": {
+          "audio": {
+            "type": "tts",
+            "script": "Breathe in... and slowly out. Follow the vibration: gentle to breathe in, strong to breathe out."
+          },
+          "haptic": "breathing_pacer",
+          "visual": {
+            "colour": "#FFFFFF",
+            "background": "#0B3D91",
+            "animation": "breathing_circle",
+            "high_contrast": true,
+            "optional": true,
+            "screen_reader_text": "Breathing guide: breathe in for 4 seconds, out for 6 seconds."
+          }
+        },
+        "blind": {
+          "audio": {
+            "type": "tts",
+            "script": "Breathe in... and slowly out. Follow the vibration: gentle to breathe in, strong to breathe out."
+          },
+          "haptic": "breathing_pacer"
+        }
+      }
+    },
+    "iso_music": {
+      "prompt": "Want to listen to something for a few minutes?",
+      "profiles": {
+        "sighted": {
+          "visual": {
+            "colour": "#F2A65A",
+            "animation": "warm_fade",
+            "high_contrast": false,
+            "screen_reader_text": "Music suggestion: a few minutes of music that starts calm and gradually brightens."
+          },
+          "audio": {
+            "type": "music",
+            "playlist": "iso_low_to_bright",
+            "description": "Iso principle: matches a low mood first, then gradually brightens (Starcke et al. [17])."
+          },
+          "haptic": "soft_tap"
+        },
+        "low_vision": {
+          "audio": {
+            "type": "music",
+            "playlist": "iso_low_to_bright",
+            "description": "Iso principle: matches a low mood first, then gradually brightens (Starcke et al. [17])."
+          },
+          "haptic": "soft_tap",
+          "visual": {
+            "colour": "#FFFFFF",
+            "background": "#8A3B00",
+            "animation": "warm_fade",
+            "high_contrast": true,
+            "optional": true,
+            "screen_reader_text": "Music suggestion: a few minutes of music that starts calm and gradually brightens."
+          }
+        },
+        "blind": {
+          "audio": {
+            "type": "music",
+            "playlist": "iso_low_to_bright",
+            "description": "Iso principle: matches a low mood first, then gradually brightens (Starcke et al. [17])."
+          },
+          "haptic": "soft_tap"
+        }
+      }
+    },
+    "calming_timer": {
+      "prompt": "Want to take a 2-minute pause?",
+      "notes": "Design choice carried over from the proposal; no direct evidence (lit review §5). Only reachable once the model predicts anger (decisions.md #7).",
+      "profiles": {
+        "sighted": {
+          "visual": {
+            "colour_from": "#D64545",
+            "colour_to": "#4CAF50",
+            "animation": "fading_timer_2min",
+            "high_contrast": false,
+            "screen_reader_text": "Two-minute pause timer."
+          },
+          "haptic": "descending_pulses"
+        },
+        "low_vision": {
+          "audio": {
+            "type": "tts",
+            "script": "Let's pause for two minutes. Breathe slowly as the vibration fades."
+          },
+          "haptic": "descending_pulses",
+          "visual": {
+            "colour_from": "#FF3B30",
+            "colour_to": "#00C853",
+            "background": "#000000",
+            "animation": "fading_timer_2min",
+            "high_contrast": true,
+            "optional": true,
+            "screen_reader_text": "Two-minute pause timer."
+          }
+        },
+        "blind": {
+          "audio": {
+            "type": "tts",
+            "script": "Let's pause for two minutes. Breathe slowly as the vibration fades."
+          },
+          "haptic": "descending_pulses"
+        }
+      }
+    },
+    "recovery_cue": {
+      "prompt": "Looks like things eased up. Nice.",
+      "notes": "Only positive feedback: fires on a change from stressed/sad/angry to happy/neutral, never for a continuing happy/neutral state. Design choice, no direct evidence (lit review §5).",
+      "profiles": {
+        "sighted": {
+          "visual": {
+            "colour": "#6BBF73",
+            "animation": "soft_banner",
+            "high_contrast": false,
+            "screen_reader_text": "Things seem to have eased up."
+          },
+          "haptic": "double_tap"
+        },
+        "low_vision": {
+          "audio": {
+            "type": "sound",
+            "asset": "chime_soft"
+          },
+          "haptic": "double_tap",
+          "visual": {
+            "colour": "#FFFFFF",
+            "background": "#1B5E20",
+            "animation": "soft_banner",
+            "high_contrast": true,
+            "optional": true,
+            "screen_reader_text": "Things seem to have eased up."
+          }
+        },
+        "blind": {
+          "audio": {
+            "type": "sound",
+            "asset": "chime_soft"
+          },
+          "haptic": "double_tap"
+        }
+      }
+    }
+  }
+}

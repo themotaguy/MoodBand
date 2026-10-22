@@ -111,6 +111,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 
 **RF vs SVM probabilities (Decision #17):** with the Platt-scaled probabilities the feedback module needs, the SVM drops to 0.320 balanced accuracy and almost never predicts sad (0%) or stressed (7%), so the feedback replay suggests no breaks at all. The Random Forest stays the model. Results: `model/results/calibration/`.
 
+**Replay mode (Decision #18):** the app's Replay screen plays a recorded LifeSnaps day at one hour per minute. The Random Forest's held-out predictions and the decision module run on the laptop (`feedback/server.py`), each suggestion arrives as a scheduled notification, and answers are stored on the phone and saved on the laptop. Test checklist: `Docs/replay-test.md`.
+
 **Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
 
 ## Repository structure
@@ -139,6 +141,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
 │   ├── decision.py           # Decision rule: mood prediction + profile → intervention or nothing
 │   ├── simulate.py           # Replays held-out predictions to tune the confidence threshold
+│   ├── replay.py             # One recorded day through model + decision module (replay mode)
+│   ├── server.py             # Laptop server the app's Replay screen talks to
 │   └── tests/                # Guardrail and accessibility tests
 ├── app/                      # React Native (Expo) companion app — haptics prototype so far
 ├── data/                     # Datasets (gitignored — download separately)
@@ -167,6 +171,7 @@ python3 -m venv .venv
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
 .venv/bin/python -m unittest discover -s feedback/tests -t .   # feedback module tests
 .venv/bin/python feedback/simulate.py         # feedback simulation (~5 min first run, then cached)
+.venv/bin/python -m feedback.server           # replay server for the app (same Wi-Fi as the phone)
 ```
 
 ## Tech stack

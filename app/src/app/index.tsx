@@ -1,5 +1,5 @@
-// Home: accessibility profile, test notifications for each suggestion, the
-// on-demand break, and the "Was this right?" answers so far.
+// Home: accessibility profile, test notifications for each suggestion, replay of a
+// recorded day, the on-demand break, and the "Was this right?" answers so far.
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AccessibilityInfo, Alert, ScrollView, StyleSheet, Text } from 'react-native';
@@ -22,8 +22,8 @@ export default function Home() {
   const { profile, setProfile, answers, snoozedUntil } = useAppState();
 
   // Tapping a suggestion notification opens its session (also from a cold start).
-  useEffect(() => onSuggestionOpened(id => {
-    if (isIntervention(id)) router.push({ pathname: '/session/[id]', params: { id } });
+  useEffect(() => onSuggestionOpened((id, replay) => {
+    if (isIntervention(id)) router.push({ pathname: '/session/[id]', params: { id, ...replay } });
   }), []);
 
   async function sendTest(id: string) {
@@ -64,6 +64,14 @@ export default function Home() {
         </Text>
       ) : null}
 
+      <Text accessibilityRole="header" style={text.section}>Replay a recorded day</Text>
+      <Button
+        title="Replay"
+        role="link"
+        detail="Real suggestions from the mood model, played from a study participant's day"
+        onPress={() => router.push('/replay')}
+      />
+
       <Text accessibilityRole="header" style={text.section}>Right now</Text>
       <Button
         title="I need a break"
@@ -76,8 +84,9 @@ export default function Home() {
         <Text style={text.body}>No answers yet. After each break you’ll be asked whether it was right.</Text>
       ) : (
         answers.map(a => (
-          <Text key={a.at.toISOString()} style={text.body}>
-            {a.at.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}: {a.intervention.replace('_', ' ')} — {a.answer.replace('_', ' ')}
+          <Text key={a.at} style={text.body}>
+            {new Date(a.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}: {a.intervention.replace('_', ' ')} — {a.answer.replace('_', ' ')}
+            {a.replay ? ` (replay${a.sent ? ', saved on laptop' : ''})` : ''}
           </Text>
         ))
       )}

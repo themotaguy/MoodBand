@@ -1,7 +1,8 @@
 // Step 2 of an intervention (decisions.md #13): the break itself, played with the
 // phone in hand once the user has opened the suggestion. It first asks for the
 // user's go-ahead (decisions.md #14), then plays the catalog's channels for the
-// user's profile, and ends with "Was this right?". The on-demand break
+// user's profile, and ends with "Was this right?". Snooze is offered at both steps,
+// so declining suggestions for a while doesn't mean sitting through one. The on-demand break
 // (`start=now`) and the recovery cue skip the question.
 import { setAudioModeAsync } from 'expo-audio';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -79,7 +80,10 @@ function ColourPanel({ visual, sessionMs }: { visual: Visual; sessionMs: number 
 }
 
 export default function Session() {
-  const { id, start } = useLocalSearchParams<{ id: string; start?: string }>();
+  const { id, start, participant, date, time, mood } = useLocalSearchParams<{
+    id: string; start?: string; participant?: string; date?: string; time?: string; mood?: string;
+  }>();
+  const replay = participant && date && time && mood ? { participant, date, time, mood } : undefined;
   const { profile, recordAnswer } = useAppState();
   // The recovery cue is a message, not an exercise, so there is nothing to agree to.
   const skipAsk = start === 'now' || id === 'recovery_cue';
@@ -133,8 +137,8 @@ export default function Session() {
   }
 
   function answer(a: 'yes' | 'no' | 'snooze' | 'not_now') {
-    recordAnswer(r!.id, a);
-    announce(a === 'not_now' ? 'Okay, maybe later.' : 'Thanks.');
+    recordAnswer(r!.id, a, replay);
+    announce(a === 'not_now' ? 'Okay, maybe later.' : a === 'snooze' ? 'Okay, no suggestions for an hour.' : 'Thanks.');
     router.back();
   }
 
@@ -146,9 +150,13 @@ export default function Session() {
         <Text accessibilityRole="header" style={text.title}>{r.prompt}</Text>
         {phase === 'ask' ? (
           <>
+            {replay ? (
+              <Text style={text.body}>Replay: at {replay.time} in the recorded day, the model read {replay.mood}.</Text>
+            ) : null}
             <Text style={text.body}>About {Math.round(sessionMs / 1000)} seconds. Nothing starts until you choose.</Text>
             <Button title="Start" hint="Starts the break." onPress={() => setPhase('running')} />
             <Button title="Not now" hint="Closes this suggestion." onPress={() => answer('not_now')} />
+            <Button title="Snooze for an hour" hint="No suggestions for an hour." onPress={() => answer('snooze')} />
           </>
         ) : phase === 'running' ? (
           <>

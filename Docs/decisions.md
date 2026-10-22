@@ -477,6 +477,54 @@ re-weighting by class priors before the threshold is re-tuned.
 
 ---
 
+## 18. Replay mode: the app driven by the real model and decision module (offline)
+
+**Decision** (Oct 21, 2026): before the live Fitbit, the app is connected to the
+model and decision module through **replay of recorded LifeSnaps days**.
+
+- **Laptop** (`feedback/replay.py`, `feedback/server.py`, standard library
+  only):
+  - For a participant-day, every 10-minute prediction from 08:00 to 22:00
+    comes from a Random Forest that never saw that person (simulate.py's
+    cached out-of-fold predictions), and is fed to `FeedbackDecider`.
+  - The server returns that timeline, lists demo days (most suggestions
+    matching the person's own report first), and saves the app's answers to
+    `data/replay/answers.csv` with the person's report within 30 min added.
+- **Phone** (`app/src/app/replay.tsx`):
+  - Plays the day at **1 hour per minute**: a day takes 14 minutes.
+  - Every suggestion is **scheduled in advance as a local notification**,
+    so it arrives with the phone locked; push would need the paid developer
+    account.
+  - Tapping it opens the usual session. Snooze skips the next recorded hour.
+  - Answers are stored on the phone (AsyncStorage) and sent to the laptop,
+    retried until accepted.
+- **Why on the laptop**: the architecture allows it (#4). The Python module
+  is already tested, its settings can change without an app rebuild, and the
+  live version will likely sit on a backend anyway, since the Google Health
+  API is a cloud API. Running it on the phone stays a later option.
+- **Limits**:
+  - In replay the tester is not the person whose data it is, so their
+    "Was this right?" answers test the *flow*, not the model. The person's
+    own reports, shown on screen and saved with each answer, are the
+    accuracy check. Real personal labels only come with the live Fitbit.
+  - The phone and laptop must share a Wi-Fi network. iOS needs the
+    local-network permission and `NSAllowsLocalNetworking`; a `.local`
+    hostname is the fallback if a bare IP is refused.
+  - The live phase will need push notifications for a server-initiated
+    suggestion, which means the paid Apple account.
+
+**Tested** (Oct 21, iPhone 15 Pro Max): connection and playback checks
+pass. Plain HTTP to the laptop's IP address works, so the `.local` fallback
+isn't needed. Notifications arrive with the app open and with the phone
+locked, and answers that fail to send are delivered once the server is back.
+Testing found that **snooze was only offered after a break**, so declining
+suggestions for a while meant sitting through one. The session's first
+screen now offers **Start / Not now / Snooze for an hour**.
+
+Test checklist: `Docs/replay-test.md` (VoiceOver checks still to do).
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it

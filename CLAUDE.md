@@ -56,8 +56,11 @@ Not yet done / in progress:
    on. Model benchmark done (#15: SVM 0.351 vs RF 0.334); feature
    experiment done (#16: no extra Fitbit signal helps unseen people).
    RF stays the model (#17: calibrated SVM never predicts sad).
-   **Next**: mid-term presentation (Oct 28); later, saving answers and connecting the decision
-   module. Builds: standalone `npx expo run:ios --device --configuration
+   Replay mode built (#18): the app plays recorded days through the model
+   and decision module (`feedback/server.py` on the laptop); answers saved.
+   Tested on iPhone Oct 21 (`docs/replay-test.md`; VoiceOver checks left).
+   **Next**: mid-term presentation (Oct 28); then the Google Health API
+   prototype (task 3). Builds: standalone `npx expo run:ios --device --configuration
    Release` (no dev server needed; free signing expires 7 days after
    install); dev build + `npx expo start` only on the same Wi-Fi. Follow
    `app/AGENTS.md` for Expo work.

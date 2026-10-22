@@ -22,28 +22,41 @@ export async function ensurePermission(): Promise<boolean> {
   return asked.granted;
 }
 
+/** Where a replayed suggestion came from: the recorded day and the model's mood. */
+export type ReplayContext = { participant: string; date: string; time: string; mood: string };
+
 /** Schedule a suggestion; `quiet` (recovery cue) shows it without a sound. */
 export async function scheduleSuggestion(intervention: string, body: string, seconds: number, quiet = false) {
   return Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'MoodBand',
-      body,
-      data: { intervention },
-      sound: quiet ? false : 'default',
-    },
+    content: content(intervention, body, quiet),
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds },
   });
 }
 
-/** Calls `open` with the intervention id when the user taps a notification,
- * including the one that launched the app from closed. Returns a cleanup. */
-export function onSuggestionOpened(open: (intervention: string) => void): () => void {
+/** Schedule a replayed suggestion for a set time, so it arrives with the phone locked. */
+export async function scheduleReplaySuggestion(intervention: string, body: string, at: Date,
+                                               replay: ReplayContext, quiet = false) {
+  return Notifications.scheduleNotificationAsync({
+    content: content(intervention, body, quiet, replay),
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: at },
+  });
+}
+
+export const cancelSuggestion = (id: string) => Notifications.cancelScheduledNotificationAsync(id);
+
+function content(intervention: string, body: string, quiet: boolean, replay?: ReplayContext) {
+  return { title: 'MoodBand', body, data: { intervention, ...(replay ? { replay } : {}) }, sound: quiet ? false : 'default' };
+}
+
+/** Calls `open` with the intervention id (and replay context, if any) when the user
+ * taps a notification, including the one that launched the app from closed. Returns a cleanup. */
+export function onSuggestionOpened(open: (intervention: string, replay?: ReplayContext) => void): () => void {
   const handle = (response: Notifications.NotificationResponse | null) => {
     if (!response || response.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
-    const id = response.notification.request.content.data?.intervention;
-    if (typeof id === 'string') {
+    const data = response.notification.request.content.data;
+    if (typeof data?.intervention === 'string') {
       Notifications.clearLastNotificationResponse();
-      open(id);
+      open(data.intervention, data.replay as ReplayContext | undefined);
     }
   };
   handle(Notifications.getLastNotificationResponse());

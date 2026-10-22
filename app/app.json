@@ -8,7 +8,13 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ritikmota.moodband"
+      "bundleIdentifier": "com.ritikmota.moodband",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        },
+        "NSLocalNetworkUsageDescription": "MoodBand connects to the replay server on your laptop over Wi-Fi."
+      }
     },
     "android": {
       "adaptiveIcon": {

@@ -9,6 +9,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerLargeTitle: false, contentStyle: { backgroundColor: '#FFFFFF' } }}>
         <Stack.Screen name="index" options={{ title: 'MoodBand' }} />
         <Stack.Screen name="session/[id]" options={{ title: 'Break', presentation: 'fullScreenModal', headerShown: false }} />
+        <Stack.Screen name="replay" options={{ title: 'Replay' }} />
         <Stack.Screen name="haptics" options={{ title: 'Haptics test' }} />
       </Stack>
       <StatusBar style="dark" />

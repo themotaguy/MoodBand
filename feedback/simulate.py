@@ -13,9 +13,11 @@ through FeedbackDecider. For each confidence threshold it reports:
                 within 30 min
 This picks the default min_confidence (Docs/feedback-module-plan.md).
 
-Predictions are cached in data/lifesnaps/sim_predictions.csv.gz (delete to rebuild).
+Predictions are cached in data/lifesnaps/sim_predictions[_svm].csv.gz (delete to rebuild).
 
-Usage: python feedback/simulate.py
+Usage: python feedback/simulate.py [--model rf|svm]
+  rf  (default) the deployed Random Forest
+  svm the benchmark's RBF SVM with Platt-scaled probabilities (decisions.md #15)
 """
 
 import sys
@@ -24,7 +26,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "model"))
@@ -34,14 +41,23 @@ from feedback.decision import Config, FeedbackDecider, Prediction, UserSettings 
 from train_baseline import SEED, WINDOW_MIN, make_rf  # noqa: E402
 from windows import DATA, WINDOW_FEATURES, load_minutes, window_dataset, window_features  # noqa: E402
 
-CACHE = DATA / "sim_predictions.csv.gz"
+CACHES = {"rf": DATA / "sim_predictions.csv.gz", "svm": DATA / "sim_predictions_svm.csv.gz"}
 STEP_MIN = 10
 DAY_START, DAY_END = 8, 22
 MATCH = timedelta(minutes=30)
 THRESHOLDS = [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
 
 
-def build_predictions():
+def make_svm():
+    # Platt scaling fitted with an internal 5-fold CV on the training fold.
+    return make_pipeline(SimpleImputer(), StandardScaler(),
+                         CalibratedClassifierCV(SVC(C=1.0, class_weight="balanced", random_state=SEED), cv=5, ensemble=False))
+
+
+MAKERS = {"rf": make_rf, "svm": make_svm}
+
+
+def build_predictions(model_name):
     minutes = load_minutes()
     X, y, groups, reports = window_dataset(WINDOW_MIN, minutes)
     days = reports.assign(date=reports["ts"].dt.normalize())[["id", "date"]].drop_duplicates()
@@ -53,7 +69,7 @@ def build_predictions():
     cv = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=SEED)
     parts = []
     for fold, (train, test) in enumerate(cv.split(X, y, groups), 1):
-        model = make_rf().fit(X.iloc[train], y.iloc[train])
+        model = MAKERS[model_name]().fit(X.iloc[train], y.iloc[train])
         test_ids = set(groups.iloc[test])
         windows = window_features(grid.loc[grid["id"].isin(test_ids), ["id", "ts"]], *minutes, WINDOW_MIN)
         proba = pd.DataFrame(model.predict_proba(windows[WINDOW_FEATURES]),
@@ -61,7 +77,7 @@ def build_predictions():
         parts.append(pd.concat([windows[["id", "ts", "steps_sum"]], proba], axis=1))
         print(f"  fold {fold}: {len(windows):,} predictions", flush=True)
     preds = pd.concat(parts, ignore_index=True)
-    preds.to_csv(CACHE, index=False)
+    preds.to_csv(CACHES[model_name], index=False)
     return preds
 
 
@@ -75,7 +91,9 @@ def replay(preds, config):
             d = decider.decide(p, UserSettings())
             if d.acts:
                 fired.append((pid, row.ts, d.reason, d.mood))
-    return pd.DataFrame(fired, columns=["id", "ts", "reason", "mood"])
+    fired = pd.DataFrame(fired, columns=["id", "ts", "reason", "mood"])
+    fired["ts"] = pd.to_datetime(fired["ts"])  # keeps the dtype when nothing fired
+    return fired
 
 
 def score(fired, preds, reports):
@@ -104,11 +122,13 @@ def score(fired, preds, reports):
 
 
 def main():
-    if CACHE.exists():
-        preds = pd.read_csv(CACHE, parse_dates=["ts"])
-        print(f"Loaded {len(preds):,} cached predictions from {CACHE}")
+    model_name = sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv else "rf"
+    cache = CACHES[model_name]
+    if cache.exists():
+        preds = pd.read_csv(cache, parse_dates=["ts"])
+        print(f"Loaded {len(preds):,} cached predictions from {cache}")
     else:
-        preds = build_predictions()
+        preds = build_predictions(model_name)
     _, _, _, reports = window_dataset(WINDOW_MIN)
     reports = reports[["id", "ts", "mood"]]
     chance = reports["mood"].value_counts(normalize=True)

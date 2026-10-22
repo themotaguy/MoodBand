@@ -392,8 +392,8 @@ only partition so many ways). Untuned defaults, balanced class weights.
 - Every model confuses neutral with stressed and happy (see the confusion
   matrices).
 
-**Status**: the Random Forest stays the deployed model for now; the SVM is
-the leading alternative. Re-run the benchmark once EmoPhone/TILES data is
+**Status**: the Random Forest stays the deployed model; see #17 (the SVM's
+lead disappears once it outputs probabilities). Re-run the benchmark once EmoPhone/TILES data is
 available (5 classes, more people), and before switching note that the
 feedback module needs class probabilities — an SVM needs probability
 calibration (Platt scaling), which should be checked against decisions.md
@@ -438,6 +438,42 @@ remaining levers are **personalization** (per-person models scored
 0.38–0.42, #8) and **more data** (EmoPhone, TILES). Re-try group B and
 activity-adjusted HR on those datasets, and use D as candidate features for
 the personalized model, where telling people apart is not a problem.
+
+---
+
+## 17. Random Forest stays: the SVM's lead disappears once it gives probabilities
+
+**Question** (Oct 21, 2026): should the SVM (#15) replace the Random Forest?
+The feedback module acts on class probabilities, so the SVM was tested with
+Platt-scaled probabilities (`CalibratedClassifierCV`, sigmoid, internal 5-fold
+CV). `model/calibration.py` (results in `model/results/calibration/`) and
+`feedback/simulate.py --model svm`; same splits and seeds as #15.
+
+| Held-out mood reports | Random Forest | SVM + Platt |
+|---|---|---|
+| Balanced accuracy (most probable class) | **0.334** | 0.320 |
+| Recall happy / neutral / sad / stressed | 0.48 / 0.33 / **0.17** / **0.35** | 0.65 / 0.57 / **0.00** / **0.07** |
+| Brier score / log loss (lower is better) | 0.715 / 1.313 | 0.680 / 1.225 |
+| Calibration error (ECE) | 0.036 | 0.013 |
+| Confidence AUC for "prediction correct" (0.5 = no information) | 0.572 | 0.534 |
+
+Feedback replay over 1,295 report days, at the 0.45 threshold: the RF suggests
+1.18 breaks a day; the **SVM suggests none** (0.03 a day even at 0.30).
+
+- Platt scaling is fitted on the real class frequencies, which **undoes the
+  class balancing**. The calibrated SVM's probabilities are more honest on
+  average (lower Brier, lower ECE), but they lean to the common moods, happy
+  and neutral. Its most probable class is almost never sad or stressed, the
+  two moods the feedback module exists to act on.
+- The SVM's 0.351 in #15 came from `SVC.predict`, which uses the balanced
+  decision boundary and has no usable probabilities.
+- In neither model does confidence say much about correctness (AUC
+  0.53–0.57), consistent with #11.
+
+**Decision**: the **Random Forest stays the model** for the feedback module.
+Don't switch to the SVM on LifeSnaps. Re-run the benchmark and this check on
+EmoPhone/TILES. If the SVM is ever reconsidered, its probabilities would need
+re-weighting by class priors before the threshold is re-tuned.
 
 ---
 

@@ -109,6 +109,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 
 **Feature experiment (Decision #16):** adding other Google Health API signals (activity-adjusted heart rate, longer context, calories, exercise, last night's HRV/SpO2/temperature/sleep) and a sign-up profile does not beat the 12 baseline features for unseen people (best +0.003, within noise); overnight and profile features lower accuracy by 0.02–0.05. Next levers are personalization and more data. Chart: `model/results/feature_experiment/feature_runs.png`.
 
+**RF vs SVM probabilities (Decision #17):** with the Platt-scaled probabilities the feedback module needs, the SVM drops to 0.320 balanced accuracy and almost never predicts sad (0%) or stressed (7%), so the feedback replay suggests no breaks at all. The Random Forest stays the model. Results: `model/results/calibration/`.
+
 **Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
 
 ## Repository structure
@@ -130,6 +132,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── features_plus.py      # Extra Fitbit-available feature groups (B–E)
 │   ├── feature_experiment.py # Adds feature groups one at a time (RF + SVM)
 │   ├── results/feature_experiment/  # Feature experiment results + chart
+│   ├── calibration.py        # RF vs SVM probability calibration
+│   ├── results/calibration/  # Calibration summary + reliability chart
 │   └── requirements.txt
 ├── feedback/
 │   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
@@ -157,6 +161,8 @@ python3 -m venv .venv
 .venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
 .venv/bin/python model/benchmark.py           # model comparison + confusion matrices (~5 min)
 .venv/bin/python model/feature_experiment.py  # extra feature groups (needs calories/exercise extract)
+.venv/bin/python model/calibration.py         # RF vs SVM probabilities (~5 min)
+.venv/bin/python feedback/simulate.py --model svm  # feedback replay with SVM probabilities
 .venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
 .venv/bin/python -m unittest discover -s feedback/tests -t .   # feedback module tests

@@ -222,7 +222,7 @@ async function main() {
 
   // 6 — Benchmark chart
   {
-    const s = content("Progress so far", "An SVM edges out the Random Forest");
+    const s = content("Progress so far", "The Random Forest stays");
     const order = [...summary].sort((a, b) => b.balanced_accuracy_mean - a.balanced_accuracy_mean);
     // Drawn from shapes, not addChart(): Keynote doesn't import pptxgenjs charts, and the
     // deck may be presented from Keynote. Same scale for bars, ticks and the chance line.
@@ -242,16 +242,16 @@ async function main() {
     s.addShape(pres.shapes.LINE, { x: X(0.25), y: top - 0.05, w: 0, h: rowH * order.length + 0.05, line: { color: HEX.dk2, width: 1.25 }, objectName: "Chance line" });
     T(s, "Balanced accuracy on unseen people, mean of 5 seeds. Dark line = chance (0.25).", { x: 0.5, y: 4.85, w: 5.6, h: 0.3, fontSize: 11, color: C.text2 });
     const points = [
-      ["SVM 0.351 vs Random Forest 0.334", "Better on every split of the participants"],
-      ["Catches sad twice as often", "32% vs 17% of sad reports, but fewer happy ones; macro-F1 is a tie"],
-      ["More complex is not better", "Gradient boosting and the neural network do worse: the signal is the limit, not the model"],
+      ["SVM 0.351 vs Random Forest 0.334", "Ahead on plain predictions, on every split, mainly by catching sad"],
+      ["But not with probabilities", "Which feedback needs: the SVM then drops to 0.320 and never predicts sad"],
+      ["More complex is not better", "Boosting and the neural network do worse; extra Fitbit signals (sleep, HRV, calories) didn't help either"],
     ];
     for (const [i, [head, body]] of points.entries()) {
       const y = 1.4 + i * 1.18;
       T(s, head, { x: 6.45, y, w: 3.05, h: 0.35, bold: true, fontSize: 15 });
       T(s, body, { x: 6.45, y: y + 0.38, w: 3.05, h: 0.75 });
     }
-    s.addNotes("To check whether a more complex model helps, I compared six models on exactly the same data and splits. The SVM edges out the Random Forest on every split, mostly because it catches sad far more often. But gradient boosting and a small neural network do worse. With about two thousand labels, model capacity isn't the bottleneck; the information in heart rate and steps is. That's why more data matters more than a fancier model.");
+    s.addNotes("To check whether a more complex model helps, I compared six models on exactly the same data and splits. On plain predictions the SVM edges out the Random Forest on every split, mostly because it catches sad far more often. But the feedback module needs probabilities to decide when to act, and once the SVM gives them its advantage disappears: it drops to 0.320 and almost never predicts sad or stressed, so in the simulation it never suggested a break. So the Random Forest stays. Gradient boosting and a small neural network do worse. With about two thousand labels, model capacity isn't the bottleneck; the information in heart rate and steps is. I also tried adding the other signals the Google Health API offers: heart rate adjusted for activity, calories, exercise, and last night's sleep, HRV, oxygen and skin temperature. None of them improved accuracy on new people, and the overnight ones made it worse. So the limit is the signal and the number of people, not the model or the features. The next steps are more data and learning each user's own patterns.");
   }
 
   // 7 — Confusion matrices
@@ -278,7 +278,7 @@ async function main() {
     });
     T(s, "Share of each reported mood predicted as each class (rows sum to 100%), pooled over 5 seeds. Darker = larger share. Both models mix up neutral with stressed and happy; the SVM finds sad far more often.",
       { x: 0.5, y: 4.35, w: 9.0, h: 0.7, fontSize: 13, color: C.text2 });
-    s.addNotes("These confusion matrices show where the errors are. Read each row as: of the times people reported this mood, how often did the model predict each class. Both models confuse neutral with stressed and happy, which is expected since heart rate and steps can look similar across those states. The SVM's advantage is the sad row: it catches 32 percent versus 17 percent.");
+    s.addNotes("These confusion matrices show where the errors are. Read each row as: of the times people reported this mood, how often did the model predict each class. Both models confuse neutral with stressed and happy, which is expected since heart rate and steps can look similar across those states. On plain predictions the SVM's advantage is the sad row, 32 percent versus 17 percent, but as the previous slide showed, that advantage doesn't survive once it gives probabilities.");
   }
 
   // 8 — Interventions and profiles

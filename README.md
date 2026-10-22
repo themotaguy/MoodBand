@@ -105,6 +105,8 @@ Balanced accuracy, averaged over 5 repeated participant-grouped splits (chance =
 
 An early baseline: consistently better than chance, but heart rate and steps carry limited mood signal across people. Personalized models do better, but with few test labels per person their numbers vary by several points between runs. "Sad" remains hardest (F1 ≈ 0.13). See Decisions #8–#9 for detail.
 
+**Model benchmark (Decision #15):** an RBF SVM reaches 0.351 balanced accuracy vs the Random Forest's 0.334 on identical splits, mainly by detecting sad more often; macro-F1 is tied. Gradient boosting (0.297) and a small neural network (0.311) do worse, so model complexity isn't the bottleneck. Charts: `model/results/benchmark/`.
+
 **Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
 
 ## Repository structure
@@ -121,6 +123,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── evaluate_pmdata.py    # Cross-dataset check against PMData
 │   ├── explore_lifesnaps.py  # Exploratory data analysis
 │   ├── train_baseline.py     # Random Forest training + evaluation
+│   ├── benchmark.py          # Compare 6 models on identical splits; confusion matrices
+│   ├── results/benchmark/    # Benchmark summary, confusion matrices, charts
 │   └── requirements.txt
 ├── feedback/
 │   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
@@ -146,6 +150,7 @@ python3 -m venv .venv
 .venv/bin/python model/extract_lifesnaps_mongo.py path/to/mongo_rais_anonymized  # one-off, ~3 min
 .venv/bin/python model/explore_lifesnaps.py   # dataset summary + label coverage
 .venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
+.venv/bin/python model/benchmark.py           # model comparison + confusion matrices (~5 min)
 .venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
 .venv/bin/python -m unittest discover -s feedback/tests -t .   # feedback module tests

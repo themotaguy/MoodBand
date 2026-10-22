@@ -364,6 +364,43 @@ check the user trial agreement.
 
 ---
 
+## 15. Model benchmark: SVM edges out Random Forest; complexity doesn't help
+
+**Finding** (Oct 21, 2026; `model/benchmark.py`, results in
+`model/results/benchmark/`): six models on the same LifeSnaps 30-min data
+(1,961 reports, 61 participants, 4 moods) and identical participant-grouped
+5-fold splits, 5 seeds (giving 3 distinct participant groupings — 61 people
+only partition so many ways). Untuned defaults, balanced class weights.
+
+| Model | Balanced acc. | Macro-F1 | Recall: happy / neutral / sad / stressed |
+|---|---|---|---|
+| SVM (RBF) | **0.351** ± 0.002 | 0.326 | 0.38 / 0.29 / **0.32** / 0.42 |
+| Random Forest | 0.334 ± 0.006 | **0.327** | **0.48** / 0.33 / 0.17 / 0.35 |
+| Logistic regression | 0.316 ± 0.000 | 0.271 | 0.31 / 0.16 / 0.38 / 0.42 |
+| Neural network (MLP) | 0.311 ± 0.037 | 0.269 | 0.26 / 0.32 / 0.36 / 0.30 |
+| Gradient boosting | 0.297 ± 0.005 | 0.295 | 0.46 / 0.38 / 0.04 / 0.30 |
+| Majority class | 0.250 | 0.132 | — |
+
+- The **SVM beats the Random Forest on every split** (+0.017 balanced
+  accuracy), mainly by catching **sad** far more often (32% vs 17%), at the
+  cost of happy. Macro-F1 is a tie, so it is a different trade-off more than
+  a clearly better model.
+- **More complex is not better**: gradient boosting and the MLP do worse
+  than the Random Forest; the MLP is also unstable across seeds. With ~2,000
+  labels and 12 features, model capacity is not the bottleneck — the signal
+  in heart rate and steps is (consistent with #9–#11).
+- Every model confuses neutral with stressed and happy (see the confusion
+  matrices).
+
+**Status**: the Random Forest stays the deployed model for now; the SVM is
+the leading alternative. Re-run the benchmark once EmoPhone/TILES data is
+available (5 classes, more people), and before switching note that the
+feedback module needs class probabilities — an SVM needs probability
+calibration (Platt scaling), which should be checked against decisions.md
+#11's finding that confidence doesn't track correctness.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it

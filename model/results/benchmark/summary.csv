@@ -1,0 +1,7 @@
+model,balanced_accuracy_mean,balanced_accuracy_sd,macro_f1_mean,macro_f1_sd,recall_happy,recall_neutral,recall_sad,recall_stressed,vs_rf_mean_diff,vs_rf_seeds_better
+SVM (RBF),0.3507,0.0018,0.3257,0.0014,0.3753,0.2901,0.3188,0.4187,0.0169,5
+Random Forest,0.3338,0.0059,0.3268,0.0051,0.4814,0.3297,0.1719,0.3523,0.0,0
+Logistic regression,0.3159,0.0003,0.2709,0.0002,0.3099,0.1575,0.375,0.4211,-0.018,0
+Neural network (MLP),0.3114,0.0366,0.2687,0.0602,0.2641,0.3241,0.3547,0.3026,-0.0225,2
+Gradient boosting,0.2967,0.0045,0.2946,0.0046,0.4612,0.3779,0.0438,0.3038,-0.0372,0
+Majority class,0.25,0.0,0.1324,0.0,0.0,1.0,0.0,0.0,-0.0838,0

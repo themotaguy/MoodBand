@@ -1,0 +1,25 @@
+model,reported,happy,neutral,sad,stressed
+Majority class,happy,0,3120,0,0
+Majority class,neutral,0,3530,0,0
+Majority class,sad,0,640,0,0
+Majority class,stressed,0,2515,0,0
+Logistic regression,happy,967,427,940,786
+Logistic regression,neutral,742,556,808,1424
+Logistic regression,sad,165,85,240,150
+Logistic regression,stressed,459,550,447,1059
+Random Forest,happy,1502,544,384,690
+Random Forest,neutral,1032,1164,270,1064
+Random Forest,sad,254,135,110,141
+Random Forest,stressed,627,752,250,886
+Gradient boosting,happy,1439,776,137,768
+Gradient boosting,neutral,1023,1334,136,1037
+Gradient boosting,sad,289,168,28,155
+Gradient boosting,stressed,699,921,131,764
+SVM (RBF),happy,1171,447,689,813
+SVM (RBF),neutral,798,1024,475,1233
+SVM (RBF),sad,181,103,204,152
+SVM (RBF),stressed,483,651,328,1053
+Neural network (MLP),happy,824,822,871,603
+Neural network (MLP),neutral,638,1144,796,952
+Neural network (MLP),sad,134,167,227,112
+Neural network (MLP),stressed,385,812,557,761

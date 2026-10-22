@@ -1,120 +1,94 @@
 # Project Proposal — Summary
 
-Condensed from the full proposal, `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf`.
-
-> **Historical document — not kept up to date.** The proposal records the
-> project's original goal and direction (Oct 2026). It is deliberately *not*
-> revised as the project evolves (decided Oct 18, 2026); changes are
-> recorded in `decisions.md`, weekly reports, and the final report's
-> "changes from the proposal" section. **Where this file disagrees with
-> `decisions.md` or `feedback-module-plan.md`, those win** — don't change
-> code to match the proposal.
->
-> Known divergences so far:
-> - 4 mood classes, not 5 — "angry" deferred (decisions.md #7).
-> - Overnight HRV not used in the generalized model (decisions.md #8).
-> - Features from the 30 min before each report (decisions.md #9).
-> - Datasets: LifeSnaps primary; PMData dropped (#10); EmoPhone/TILES pending.
->   No Apple Watch datasets.
-> - Feedback mapping (Table 4 / §7.3, reproduced below) is superseded by
->   `feedback-module-plan.md`: three accessibility profiles, no feedback for
->   continuing happy/neutral, positive cue only on recovery, breathing pacer
->   for stress, iso-principle music for sadness, JITAI-style guardrails.
-> - Evaluation uses balanced accuracy / macro-F1, not plain accuracy.
+Condensed from the current proposal, **`Docs/Capstone_Project_Proposal_MoodBand_mk3.pdf`**
+(Oct 2026; sent to Prof. Zantout Oct 21, 2026 after his request in
+decisions.md #14). mk3 embeds the final literature review (mk5) and the
+current design. `…_mk2.pdf` is the superseded original. If this file and the
+PDF disagree, the PDF wins; if a later decision in `decisions.md` changes
+something, record it there and update the proposal at the next revision.
 
 ## Aim
 
-Design, develop, and evaluate a mood-detection system that leverages a
-Fitbit wearable to sense a user's physiological signals, classifies their
-emotional state in real time, and delivers adaptive auditory, haptic, or
-visual feedback through a companion mobile app — for both sighted and
-visually impaired users, on both Android and iOS.
+Design, develop, and evaluate a mood-detection system that uses a Fitbit to
+sense physiological signals, classifies emotional state in near real time,
+and delivers adaptive auditory, haptic, or visual feedback through a
+companion app — for sighted and visually impaired users, on Android and iOS.
 
-## Objectives
+## Objectives (§3.2)
 
-1. Review literature on affective computing, wearable sensing, and
-   accessible feedback (**done** — see `literature-review.md`).
-2. Integrate with Fitbit via the Google Health API for real-time
-   heart-rate/HRV/motion data, on both Android and iOS.
-3. Train a classifier for mood categories: happy, neutral, sad, stressed,
-   angry.
-4. Design a feedback-decision module mapping mood + accessibility profile →
-   intervention.
-5. Implement auditory/haptic/visual feedback in the companion app,
-   accessible via screen readers.
-6. Evaluate classification accuracy and perceived feedback effectiveness
-   with sighted and visually impaired participants.
+1. Review literature on affective computing, wearable sensing, mood
+   classification, accessible feedback, and mood-regulation interventions.
+2. Integrate with Fitbit via the Google Health API (heart rate + motion, near
+   real time, Android and iOS).
+3. **Train and benchmark** models classifying **five** moods: happy, neutral,
+   sad, stressed, angry.
+4. Feedback-decision module deciding *whether and how* to intervene from
+   mood, confidence, recent context, and accessibility profile.
+5. Auditory, haptic, and visual feedback in the app, screen-reader accessible.
+6. Evaluate classification on public datasets and the project's own data;
+   evaluate feedback in a small user trial.
 
-## Scope
+## Scope (§4)
 
-**In scope**: Fitbit integration via Google Health API; the
-mood-classification pipeline; the companion mobile app delivering
-auditory/haptic/visual feedback; a limited set of discrete mood categories
-(not a continuous emotional spectrum); evaluation with a small user sample.
+In: Fitbit via Google Health API; classification pipeline; companion app;
+discrete mood categories; small user trial (only after the supervisor
+confirms the user-trial/consent agreement). Processing and decision stages
+may run on phone, laptop, or cloud; feedback actuation (speaker, vibration,
+screen, notifications) runs on the phone.
+Out: custom hardware; clinical validation; mass manufacturing; platforms
+beyond the Google Health API; teaching visually impaired users to decode
+colour cues (proposed as a follow-on project).
 
-**Explicitly flexible**: processing and feedback-decision logic can run on
-mobile, laptop, or cloud — see `decisions.md` §4. Only feedback-actuation is
-pinned to the phone.
+## Methodology (§7)
 
-**Out of scope**: custom wearable hardware; long-term clinical validation;
-mass-manufacturing; third-party health platforms beyond the Google Health
-API; teaching visually impaired users to interpret colour-based cues
-directly (a separate, non-trivial idea proposed as a follow-on project, not
-part of this one).
+- **Two phases**: offline (model + feedback module + app on public datasets)
+  first, then live Fitbit integration and the user trial.
+- **Data and model** (§7.2): LifeSnaps primary (1,961 reports, 61
+  participants; 30-min windows); Random Forest ~0.33 balanced accuracy vs
+  0.25 chance; benchmark against an SVM and a small neural network, with
+  confusion matrices for every model and dataset. Anger requires more data:
+  EmoPhone (wave D-3 anger ratings) requested; TILES-2018 adds stress/affect
+  data (anger items unconfirmed), needs a DUA signed for Northeastern.
+- **Feedback logic** (§7.3): confidence ≥ 0.45 and 0.10 margin; 2-of-3
+  persistence; exercise filter (stressed/angry); 30-min cooldown, 4/day cap,
+  quiet hours, snooze; no feedback for continuing happy/neutral; recovery cue.
+  Suggestion framing, **explicit go-ahead before any intervention**, "Was
+  this right?" labels, on-demand break.
+- **App** (§7.4): React Native + Expo; two-step delivery (notification, then
+  session after the user agrees), since phone haptics are only felt in the
+  hand (decisions.md #13); Fitbit wrist-notification mirroring to be tested.
+- **Evaluation** (§7.5): participant-grouped CV, balanced accuracy and
+  macro-F1, multi-seed averages, confusion matrices; replay simulation for
+  the feedback module; on-device checklist for the app. **User trial with
+  friends** — not expected to include visually impaired users (stated
+  limitation; VI profiles checked via on-device screen-reader testing).
 
-## Methodology phases
+## Feedback (§8)
 
-**Phase 1 (offline)**: build and validate the mood-classification model,
-feedback-decision logic, and mobile app end-to-end using public datasets
-(`datasets.md`) as a stand-in for live sensor data.
+Table 3 (mood → intervention): stressed → breathing pacer (~6 breaths/min,
+strong-exhale vibration; heartbeat tap and music as alternatives); sad →
+iso-principle music; angry → calming timer (design choice); happy/neutral →
+nothing; recovery → brief quiet cue. Table 4 (profiles): sighted → visual +
+haptic; low vision → audio + haptic, optional high-contrast visuals; blind →
+always audio + haptic, deferred audio when silenced, never visual-only.
+Detail and evidence: `feedback-module-plan.md`, lit review §5.5.
 
-**Phase 2 (live integration)**: once Phase 1 works, integrate the live
-Fitbit sensing layer via the Google Health API in place of the offline
-dataset.
-
-Data collection protocol (for the project's own small-scale trial, after
-Phase 1): volunteer participants exposed to mood-inducing stimuli (calming
-music, stressful timed tasks, neutral video) while Fitbit signals are logged
-and self-reported mood is collected as ground truth.
-
-## Feedback mapping (original proposal, Table 4 — superseded, see `feedback-module-plan.md`)
-
-| Mood Detected | Sighted Users | Visually Impaired Users |
-|---|---|---|
-| Stress / Anxiety | Cool-toned in-app colour pulse + on-screen breathing animation | Slow-paced phone vibration synced with spoken breathing cues |
-| Sadness | Warm colour cue + suggested uplifting playlist | Gentle spoken affirmation + calming audio track |
-| Anger / Frustration | Red-to-green fading colour cue as a calming timer | Descending vibration intensity + guided calming voice prompt |
-| Neutral / Happy | Soft green confirmation banner, no interruption | Brief pleasant chime, no interruption |
-
-## Timeline (16 weeks, revised ordering)
+## Timeline (§11, Table 5)
 
 | Phase | Weeks |
 |---|---|
 | Literature review & requirements | 1–2 |
-| Dataset acquisition & preprocessing | 1–6 |
-| Mood-classification model training (offline) | 3–10 |
+| Dataset acquisition (LifeSnaps; EmoPhone D-3; TILES-2018) | 1–10 |
+| Model training & benchmarking (offline) | 3–13 |
 | Feedback module development | 3–10 |
-| Mobile companion app development | 7–13 |
-| Offline system integration & testing (no live wearable) | 11–13 |
-| Fitbit / Google Health API integration & setup | 11–16 |
-| End-to-end testing with live wearable data | 14–16 |
-| User trials (sighted & visually impaired) | 14–16 |
-| Evaluation, documentation & final report | 14–16 |
+| Mobile app development | 7–13 |
+| Offline integration & testing | 11–13 |
+| Fitbit / Google Health API integration | 11–16 |
+| End-to-end live testing; user trial; evaluation & report | 14–16 |
 
-Note the deliberate ordering: app/model/feedback work happens before live
-Fitbit integration (see `decisions.md` §5).
+## Budget (§12, Table 6)
 
-## Budget (minimal — no custom hardware)
-
-Fitbit device ($30–130 if not already owned), Google Health API access
-(free), Flutter/React Native + Figma (free), Firebase (free tier), plus a
-small contingency (~$55 total software/misc cost).
-
-## Expected outcomes
-
-- Cross-platform mobile app connecting to Fitbit via Google Health API
-- Trained mood-classification model (≥4 categories)
-- In-app feedback subsystem (auditory, haptic, visual)
-- Accessible, screen-reader-compatible interface
-- Usability evaluation report
-- Documented, extensible architecture
+Fitbit (Inspire 3 recommended) bought by the supervisor; Google Health API,
+React Native/Expo, Firebase free tier: $0; **Apple Developer Program $99/year**
+(TestFlight for trial participants — free signing expires after 7 days);
+miscellaneous $50; contingency $15. **Total ≈ $164** excluding the Fitbit.

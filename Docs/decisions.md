@@ -134,6 +134,9 @@ user trial will necessarily be small.
 
 ## 7. "Angry" mood class deferred; classifier trained 4-class for now
 
+> **Superseded Oct 21, 2026** (Decision #14): anger is required in the final
+> classifier; deferral holds only until EmoPhone/TILES data is available.
+
 **Decision** (Oct 15, 2026): the classifier is trained on four classes —
 happy, neutral, sad, stressed. "Angry" stays in MoodBand's target set and
 feedback mapping but is **deferred**: no model work on it until the
@@ -327,32 +330,72 @@ supported as far as known; check during the API prototype (Open items).
 
 ---
 
+## 14. Supervisor meeting, Oct 21, 2026 — outcomes
+
+- **Proposal must be updated** (reverses the Oct 18 plan to keep mk2 as a
+  historical record): produce an updated proposal containing the final
+  literature review (mk5) and current design, and share it with Prof.
+  Zantout. **Done Oct 21**: `Capstone_Project_Proposal_MoodBand_mk3.pdf`
+  (adds a stated limitation that the friends trial won't include visually
+  impaired users, and the Apple Developer Program at $99/yr for TestFlight).
+- **Benchmark a more complex model** on the same data to see whether
+  accuracy improves over the Random Forest baseline (decisions.md #6 already
+  named SVM and a small neural network as alternatives).
+- **Ask before starting feedback**: the feedback module must get the user's
+  explicit go-ahead before an intervention plays — not start automatically
+  when a suggestion is opened (refines Decision #13).
+- **Mid-term presentation next week** — needs a deck.
+- **User trial confirmed**: data collection with friends as participants.
+  Prof. Zantout is buying a Fitbit for the project and checking the user
+  trial agreement (human-subjects / consent).
+- **"Angry" is required** — supersedes the deferral in Decision #7. The
+  final classifier must detect all five moods, so access to **EmoPhone**
+  (wave D-3 has 0–6 *Angry* ratings) and **TILES-2018** is now necessary,
+  not optional. (Check which TILES affect items, if any, capture anger.)
+- **Confusion matrices** for every model compared, and for the same model
+  across datasets (LifeSnaps vs. EmoPhone vs. TILES) once access arrives.
+
+**Action items — student**: ~~share the updated proposal~~ (done); share the TILES-2018
+data-use agreement; send Prof. Zantout a Fitbit link to buy; remind him to
+check the user trial agreement.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it
   really provide 5-second HR resolution with no approval step? Is HRV still
   overnight-only, or has that changed? (Ties to Decision #2 and #3.)
-- [ ] Check whether the Google Health API (or any Fitbit interface) can trigger a
-  vibration on the wrist — would let haptics work without the phone in hand
-  (Decision #13).
+- [ ] **Wrist alerts via Fitbit notification mirroring** (Decision #13) — when
+  the Fitbit (Inspire 3 recommended, Oct 21) arrives: enable MoodBand under
+  Fitbit app → device → Notifications → App Notifications, then check that a
+  MoodBand suggestion buzzes on the wrist with the phone in a pocket, how
+  reliably it arrives, and how strong the buzz feels. This would carry the
+  *alert* to the wrist; the breathing session itself still plays on the
+  phone (the band can't play custom patterns). Also confirm whether the
+  Google Health API offers any direct way to vibrate the device (not known).
 - [ ] Confirm OAuth/auth flow end-to-end for the Google Health API works
   from both an Android and an iOS client.
-- [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: is
+- [x] ~~**Ask Prof. Zantout**: is
   deferring "angry" (Decision #7) acceptable given Objective 3 lists five
   classes? If anger must be in scope, which source — PMData, MoodBand's own
   trial (with an anger-inducing stimulus added to the protocol), or merging
   it into "stressed"? Note: the raw SEMA3 data contains **2 "ANGER"**
   responses (plus 2 Surprise, 2 Sadness, 1 Fear, 1 Joy — apparently a
-  different survey version), far too few to train on.
-- [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: review
+  different survey version), far too few to train on.~~ **Resolved Oct 21: anger is required** (Decision #14); EmoPhone and TILES access now necessary.
+- [ ] **TILES-2018 data-use agreement** — Oct 21: student to share the DUA
+  with Prof. Zantout for review and signature (was: ask at the meeting). Review
   and sign the **TILES-2018 data-use agreement** (account approved; download
   blocked until the DUA is signed). TILES-2018: Fitbit Charge 2, 212
   hospital workers, 10 weeks, semi-daily affect/anxiety/stress self-reports
   — backup/additional training data while EmoPhone access is pending (see
   `datasets.md`). Only the main data record is needed, not the audio record.
-- [ ] **Ask Prof. Zantout at the Wed Oct 21, 2026 weekly meeting**: does the
-  course require a revised proposal? Current plan (Oct 18): keep the mk2
-  proposal as a historical record and document changes in weekly reports
-  and a "changes from the proposal" section of the final report.
+- [x] ~~Does the course require a revised proposal?~~ **Yes** — resolved Oct 21
+  (Decision #14): update the proposal and share it with Prof. Zantout.
+- [ ] **User trial agreement** (human-subjects / consent) — Prof. Zantout
+  checking; student to remind him. Trial confirmed with friends as
+  participants (Decision #14).
+- [ ] **Fitbit for the project** — Prof. Zantout buying one; student to send
+  a link.
 - [ ] (Informational, not blocking) Prof. Zantout was checking with Dr. Yoon
   about a possibly related wearable project elsewhere on campus.

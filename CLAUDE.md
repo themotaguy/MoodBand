@@ -49,8 +49,13 @@ Not yet done / in progress:
    model confidence doesn't track correctness (`docs/decisions.md` #11).
    **Next build step: the mobile companion app** — React Native / Expo
    development build in `app/` (decisions.md #12); testing is on the user's
-   iPhone. First milestone: haptics prototype (`app/App.tsx`), test plan in
-   `docs/haptics-prototype-test.md`. Follow `app/AGENTS.md` for Expo work.
+   iPhone. Haptics prototype done (Oct 19). Notification → session flow
+   (decisions.md #13) built in `app/src/app/` (Expo Router: home, session,
+   haptics test) — **mid-test**: the next step is the "Next test session"
+   checklist at the top of `docs/haptics-prototype-test.md` (R1–R4 retests of
+   a haptics restart-race fix, then C4–C14). Dev server: `cd app && npx expo
+   start`; device rebuild: `npx expo run:ios --device` (free signing, expires
+   7 days after install). Follow `app/AGENTS.md` for Expo work.
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
    participants, includes anger) requested on Harvard Dataverse; TILES-2018
    account approved but its data-use agreement needs Prof. Zantout's
@@ -142,17 +147,16 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
 
 - `Docs/RitikMota_Capstone_LiteratureReview_mk5.pdf` — the final, authoritative
   literature review (earlier mk2–mk4 are superseded drafts).
-- `Docs/Capstone_Project_Proposal_MoodBand_mk2.pdf` — the original proposal,
-  kept as a **historical** record of the starting goal; deliberately not
-  updated as the project evolves. Where it disagrees with `docs/decisions.md`
-  or `docs/feedback-module-plan.md`, those win.
+- `Docs/Capstone_Project_Proposal_MoodBand_mk3.pdf` — the current proposal
+  (sent to Prof. Zantout Oct 21, 2026; includes the final lit review and
+  current design). `…_mk2.pdf` is the superseded original.
 - `docs/literature-review.md` — the 10 reviewed papers, organized by theme,
   each with an explicit "why this shaped MoodBand" note; plus the sensor
   recommendation table and a condensed device comparison.
 - `docs/decisions.md` — ADR-style log of the big decisions (device, sensors,
   architecture flexibility, build ordering) and the reasoning behind each.
-- `docs/proposal-summary.md` — condensed version of the original proposal
-  (historical), with a list of where the project has since diverged.
+- `docs/proposal-summary.md` — condensed version of the current (mk3)
+  proposal: objectives, scope, methodology, feedback tables, timeline, budget.
 - `docs/feedback-module-plan.md` — final plan for the feedback-decision
   module (next build step): decision steps, three accessibility profiles,
   feedback catalog, evaluation.

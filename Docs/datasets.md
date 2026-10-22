@@ -69,6 +69,21 @@ Ranked by fit: Fitbit-family device, in-the-moment labels, HR resolution.
    **Status (Oct 15, 2026): account approved; DUA to be reviewed/signed with
    Prof. Zantout on Oct 21.** Use TILES-2018 (main data record only), not
    TILES-2019 (57 residents, 3 weeks, affect/anxiety measured only once).
+   **Data transfer agreement terms (read Oct 21, 2026)** — must be signed by an
+   *authorized official of Northeastern* (likely the research office, not an
+   individual; check with Prof. Zantout), and signing asserts any required
+   IRB review is done (check with Northeastern IRB). Once received:
+   - Use only for MoodBand, only by the student and Prof. Zantout; never
+     shared with trial participants, classmates, cloud drives, or GitHub
+     (keep under gitignored `data/`).
+   - USC owns the data *and processed versions of it* (extracted minute files,
+     features) — same restrictions apply; models/metrics/results are ours.
+   - Credit USC / cite the TILES-2018 paper in every public output (report,
+     slides); no USC logo without approval. No re-identification attempts.
+   - **AI-assisted processing**: Claude Code reads only aggregate outputs
+     (counts, summaries, metrics) — never prints or reads raw TILES rows,
+     since tool output is sent to Anthropic (clause 5, no third-party
+     disclosure). Confirm acceptability with Prof. Zantout/USC if in doubt.
    Labels are coarser than SEMA3 (twice daily, positive/negative affect).
 3. **K-EmoPhone** (Scientific Data 2023, doi 10.1038/s41597-023-02248-2) —
    77 students, 7 days, 5,582 in-situ valence/arousal/stress/attention

@@ -7,6 +7,33 @@ design in `decisions.md`.
 
 **Device**: iPhone 15 Pro Max · iOS 27.0.1 · Date Oct 19, 2026
 
+## ▶ Next test session — start here
+
+**Before you start**
+1. Start the dev server on the Mac: in Terminal, `cd app && npx expo start`
+   (or ask Claude Code to start it). Keep it running while testing.
+2. iPhone and Mac on the **same Wi-Fi**. Open MoodBand; if it shows an error or
+   an old screen, tap **Reload JS**.
+3. Free signing: this build stops opening after **Oct 26, 2026** — ask for a
+   rebuild if it won't launch.
+
+**1. Retests after the vibration fix** (restart delay + resume only after an
+interruption) — these come first, since vibration stopped working entirely
+after the previous change:
+
+| # | Check | Result / notes |
+|---|---|---|
+| R1 | **From a notification**: Stress suggestion → lock phone → tap notification. Vibration starts with the break | |
+| R2 | **I need a break** on the home screen: vibration starts straight away | |
+| R3 | **Interruption**: during a break, open Notification Center for a few seconds, close it. Vibration resumes in step with the circle | |
+| R4 | **Haptics test** screen (home → Developer → Haptics test): patterns still play | |
+
+**2. Remaining notification-flow checks**: C4–C14 in section C below
+(background, app open, the three profiles, silent switch, "Was this
+right?", recovery cue, on-demand, VoiceOver, Reduce Motion).
+
+Short notes per check are enough, e.g. "R1 ok, R3 no vibration, C9 silent".
+
 ## A. Haptics (sighted use)
 
 | # | Check | Result / notes |
@@ -32,6 +59,27 @@ design in `decisions.md`.
 | B4 | The announcement and the vibration don't clash or cut each other off | ✅ |
 | B5 | The rotor's Headings option jumps between the two sections | ✅ |
 | B6 | Text stays readable at a larger text size (Settings → Display & Brightness → Text Size) | ✅ |
+
+## C. Notification → session flow (decisions.md #13)
+
+Home screen → **Test a suggestion**. Each test sends its notification in 5 s.
+
+| # | Check | Result / notes |
+|---|---|---|
+| C1 | First test asks for notification permission; after allowing, the notification arrives | ✅ |
+| C2 | **Locked phone**: the stress suggestion appears on the lock screen with sound/buzz; text reads "Want a 1-minute breathing break?" | ✅ |
+| C3 | Tapping it (after Face ID) opens the **breathing break** directly | ✅ Found: opening Notification Center mid-break stopped the vibration (iOS stops custom haptics when the app is inactive) while the circle continued. Fixed: haptics resume from the elapsed point when the app is active again. Retest. Dev-only "Refreshing…" bar = dev server reconnecting; absent in release builds. |
+| C4 | **App in background** (home screen): tapping the banner opens the break | |
+| C5 | **App open**: the banner still shows at the top; tapping it opens the break | |
+| C6 | Sighted: breathing circle grows on "Breathe in" (4 s) and shrinks on "Breathe out" (6 s), in time with the vibration | |
+| C7 | Low vision: high-contrast circle + spoken guidance + vibration | |
+| C8 | Blind: no visuals needed; spoken guidance + vibration | |
+| C9 | Spoken guidance plays **with the silent switch on** | |
+| C10 | After the break (or Stop): "Was this right?" with Yes / No / Snooze; the answer appears under **Your answers** | |
+| C11 | Recovery cue arrives **without** a sound | |
+| C12 | **I need a break** starts the breathing break immediately | |
+| C13 | VoiceOver: notification is read aloud on the lock screen; the session screen and its buttons read sensibly | |
+| C14 | Reduce Motion on (Settings → Accessibility → Motion): circle stays still, phase text still changes | |
 
 ## Outcome
 

@@ -13,3 +13,6 @@ venv/
 
 # macOS
 .DS_Store
+
+# Generated files (e.g. claude.ai bundle)
+build/

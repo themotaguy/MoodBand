@@ -8,6 +8,8 @@ each report. This script streams fitbit.bson (~9.7 GB) once and writes:
   data/lifesnaps/sema_responses.csv  id, completed_ts, mood, place
   data/lifesnaps/minute_hr.csv.gz    id, minute, bpm_mean, bpm_std, n  (confidence >= 1)
   data/lifesnaps/minute_steps.csv.gz id, minute, steps
+  data/lifesnaps/minute_calories.csv.gz id, minute, calories  (Fitbit's per-minute energy estimate)
+  data/lifesnaps/exercises.csv       id, start, minutes, activity, log_type
 
 Requires pymongo (for its bson module). No MongoDB server is needed.
 
@@ -30,6 +32,8 @@ OUT = REPO_ROOT / "data" / "lifesnaps"
 DEFAULT_DUMP = OUT / "mongo"
 HR_TAG = b"\x02type\x00\x0b\x00\x00\x00heart_rate\x00"
 STEPS_TAG = b"\x02type\x00\x06\x00\x00\x00steps\x00"
+CAL_TAG = b"\x02type\x00\x09\x00\x00\x00calories\x00"
+EXERCISE_TAG = b"\x02type\x00\x09\x00\x00\x00exercise\x00"
 BATCH = 500_000
 
 
@@ -68,6 +72,7 @@ def aggregate_hr(raw_docs, partials, confidence):
 
 def extract_fitbit(dump):
     hr_raw, step_rows, hr_partials = [], [], []
+    cal_raw, cal_parts, exercise_rows = [], [], []
     confidence = Counter()
     t0 = time.time()
     for i, raw in enumerate(iter_raw(dump / "fitbit.bson"), 1):
@@ -79,6 +84,16 @@ def extract_fitbit(dump):
         elif STEPS_TAG in raw:
             doc = bson.decode(raw)
             step_rows.append((str(doc["id"]), doc["data"]["dateTime"][:16], doc["data"]["value"]))
+        elif CAL_TAG in raw:
+            cal_raw.append(raw)
+            if len(cal_raw) >= BATCH:
+                cal_parts.append(calories_frame(cal_raw))
+                cal_raw = []
+        elif EXERCISE_TAG in raw:
+            d = bson.decode(raw)
+            e = d["data"]
+            exercise_rows.append((str(d["id"]), e.get("startTime"), float(e.get("duration", 0)) / 60000,
+                                  e.get("activityName"), e.get("logType")))
         if i % 10_000_000 == 0:
             print(f"  {i / 1e6:.0f}M docs scanned, {time.time() - t0:.0f}s", flush=True)
     if hr_raw:
@@ -97,7 +112,26 @@ def extract_fitbit(dump):
     steps["steps"] = pd.to_numeric(steps["steps"], errors="coerce")
     steps = steps.groupby(["id", "minute"], as_index=False)["steps"].sum()
     steps.to_csv(OUT / "minute_steps.csv.gz", index=False)
-    print(f"Minute step rows: {len(steps):,}   total time {time.time() - t0:.0f}s")
+    print(f"Minute step rows: {len(steps):,}")
+
+    if cal_raw:
+        cal_parts.append(calories_frame(cal_raw))
+    cal = pd.concat(cal_parts).groupby(["id", "minute"], as_index=False)["calories"].sum()
+    cal.to_csv(OUT / "minute_calories.csv.gz", index=False)
+    ex = pd.DataFrame(exercise_rows, columns=["id", "start", "minutes", "activity", "log_type"])
+    ex.to_csv(OUT / "exercises.csv", index=False)
+    print(f"Minute calorie rows: {len(cal):,}   exercise sessions: {len(ex):,}   total time {time.time() - t0:.0f}s")
+
+
+def calories_frame(raw_docs):
+    """Calorie records use 'MM/DD/YY HH:MM:SS'; normalise to ISO minutes like HR and steps."""
+    docs = bson.decode_all(b"".join(raw_docs))
+    df = pd.DataFrame({"id": [str(d["id"]) for d in docs],
+                       "time": [d["data"]["dateTime"] for d in docs],
+                       "calories": [d["data"]["value"] for d in docs]})
+    df["minute"] = pd.to_datetime(df["time"], format="%m/%d/%y %H:%M:%S").dt.strftime("%Y-%m-%dT%H:%M")
+    df["calories"] = pd.to_numeric(df["calories"], errors="coerce")
+    return df[["id", "minute", "calories"]]
 
 
 def main(dump):

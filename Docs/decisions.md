@@ -401,6 +401,46 @@ calibration (Platt scaling), which should be checked against decisions.md
 
 ---
 
+## 16. More Fitbit signals don't help unseen people; keep the 12 window features
+
+**Question** (Oct 21, 2026): can other signals the Google Health API exposes
+lift the modest heart-rate + steps signal? **Experiment**:
+`model/feature_experiment.py` (features in `model/features_plus.py`), same
+data, splits and seeds as #15. Groups are added cumulatively, using only data
+available at the moment of the report:
+
+| Run | Adds | Features | RF | SVM |
+|---|---|---|---|---|
+| A | baseline (#9) | 12 | 0.334 | 0.351 |
+| B | HR unexplained by activity, 2 h / 6 h context, HR trend, weekend | 19 | 0.327 | **0.354** |
+| C | calories, exercise sessions | 24 | 0.320 | 0.340 |
+| D | last night as personal deviations: HRV, sleeping HR, SpO2, skin temp, sleep, yesterday's resting HR | 33 | 0.299 | 0.317 |
+| E | sign-up profile: age band, gender, BMI, STAI, Big Five | 42 | 0.304 | 0.298 |
+| F | E with features z-scored within person | 42 | 0.306 | 0.303 |
+
+Each group alone on top of A: B 0.327 / 0.354, C 0.320 / 0.335, D 0.300 /
+0.306, E 0.313 / 0.312; activity-adjusted HR alone (`resid_mean`,
+`resid_max`) 0.339 / 0.334 (RF / SVM; seed sd 0.001–0.006).
+
+- **Nothing beats the baseline beyond noise.** The only gains (SVM +0.003
+  with B; RF +0.005 with activity-adjusted HR) are within seed variation
+  and don't hold for the other model.
+- **Overnight physiology (D) and the profile (E) hurt** by 0.02–0.05. The
+  forests use them to tell *people* apart, which doesn't carry over to unseen
+  people — the same failure as #8. HRV/SpO2 are also often missing
+  (coverage 58% / 38%).
+- EDA, Fitbit's stress score and breathing rate (in LifeSnaps) are **not** in
+  the Google Health API, so they weren't tried.
+
+**Decision**: keep the 12 window features for the generalized model. The
+limit is the signal and the number of people, not the feature set. The
+remaining levers are **personalization** (per-person models scored
+0.38–0.42, #8) and **more data** (EmoPhone, TILES). Re-try group B and
+activity-adjusted HR on those datasets, and use D as candidate features for
+the personalized model, where telling people apart is not a problem.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it

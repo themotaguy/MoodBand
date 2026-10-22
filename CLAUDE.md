@@ -53,8 +53,9 @@ Not yet done / in progress:
    tested on iPhone (Oct 21; all checks in `docs/haptics-prototype-test.md`
    pass): Expo Router screens in `app/src/app/` (home, session with Start /
    Not now, haptics test); spoken guidance goes through VoiceOver when it's
-   on. **Next**: model benchmark with confusion matrices (decisions.md #14);
-   mid-term presentation; later, saving answers and connecting the decision
+   on. Model benchmark done (#15: SVM 0.351 vs RF 0.334); feature
+   experiment done (#16: no extra Fitbit signal helps unseen people).
+   **Next**: mid-term presentation (Oct 28); later, saving answers and connecting the decision
    module. Builds: standalone `npx expo run:ios --device --configuration
    Release` (no dev server needed; free signing expires 7 days after
    install); dev build + `npx expo start` only on the same Wi-Fi. Follow

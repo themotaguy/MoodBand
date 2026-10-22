@@ -107,6 +107,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 
 **Model benchmark (Decision #15):** an RBF SVM reaches 0.351 balanced accuracy vs the Random Forest's 0.334 on identical splits, mainly by detecting sad more often; macro-F1 is tied. Gradient boosting (0.297) and a small neural network (0.311) do worse, so model complexity isn't the bottleneck. Charts: `model/results/benchmark/`.
 
+**Feature experiment (Decision #16):** adding other Google Health API signals (activity-adjusted heart rate, longer context, calories, exercise, last night's HRV/SpO2/temperature/sleep) and a sign-up profile does not beat the 12 baseline features for unseen people (best +0.003, within noise); overnight and profile features lower accuracy by 0.02–0.05. Next levers are personalization and more data. Chart: `model/results/feature_experiment/feature_runs.png`.
+
 **Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
 
 ## Repository structure
@@ -125,6 +127,9 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── train_baseline.py     # Random Forest training + evaluation
 │   ├── benchmark.py          # Compare 6 models on identical splits; confusion matrices
 │   ├── results/benchmark/    # Benchmark summary, confusion matrices, charts
+│   ├── features_plus.py      # Extra Fitbit-available feature groups (B–E)
+│   ├── feature_experiment.py # Adds feature groups one at a time (RF + SVM)
+│   ├── results/feature_experiment/  # Feature experiment results + chart
 │   └── requirements.txt
 ├── feedback/
 │   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
@@ -151,6 +156,7 @@ python3 -m venv .venv
 .venv/bin/python model/explore_lifesnaps.py   # dataset summary + label coverage
 .venv/bin/python model/train_baseline.py      # trains, evaluates, saves model/artifacts/rf_baseline.joblib
 .venv/bin/python model/benchmark.py           # model comparison + confusion matrices (~5 min)
+.venv/bin/python model/feature_experiment.py  # extra feature groups (needs calories/exercise extract)
 .venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check
 .venv/bin/python -m unittest discover -s feedback/tests -t .   # feedback module tests

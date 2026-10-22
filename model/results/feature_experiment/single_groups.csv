@@ -1,0 +1,11 @@
+run,model,mean,std
+A+B only,Random Forest,0.327,0.002
+A+B only,SVM (RBF),0.354,0.001
+A+C only,Random Forest,0.32,0.004
+A+C only,SVM (RBF),0.335,0.002
+A+D only,Random Forest,0.3,0.004
+A+D only,SVM (RBF),0.306,0.003
+A+E only,Random Forest,0.313,0.004
+A+E only,SVM (RBF),0.312,0.002
+A+B (activity-adjusted HR only),Random Forest,0.339,0.006
+A+B (activity-adjusted HR only),SVM (RBF),0.334,0.003

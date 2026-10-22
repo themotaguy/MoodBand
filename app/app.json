@@ -24,7 +24,26 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "react-native-haptic-feedback"
-    ]
+      "react-native-haptic-feedback",
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ]
+    ],
+    "scheme": "moodband",
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

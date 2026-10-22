@@ -49,13 +49,16 @@ Not yet done / in progress:
    model confidence doesn't track correctness (`docs/decisions.md` #11).
    **Next build step: the mobile companion app** — React Native / Expo
    development build in `app/` (decisions.md #12); testing is on the user's
-   iPhone. Haptics prototype done (Oct 19). Notification → session flow
-   (decisions.md #13) built in `app/src/app/` (Expo Router: home, session,
-   haptics test) — **mid-test**: the next step is the "Next test session"
-   checklist at the top of `docs/haptics-prototype-test.md` (R1–R4 retests of
-   a haptics restart-race fix, then C4–C14). Dev server: `cd app && npx expo
-   start`; device rebuild: `npx expo run:ios --device` (free signing, expires
-   7 days after install). Follow `app/AGENTS.md` for Expo work.
+   iPhone. Haptics prototype and notification → session flow done and
+   tested on iPhone (Oct 21; all checks in `docs/haptics-prototype-test.md`
+   pass): Expo Router screens in `app/src/app/` (home, session with Start /
+   Not now, haptics test); spoken guidance goes through VoiceOver when it's
+   on. **Next**: model benchmark with confusion matrices (decisions.md #14);
+   mid-term presentation; later, saving answers and connecting the decision
+   module. Builds: standalone `npx expo run:ios --device --configuration
+   Release` (no dev server needed; free signing expires 7 days after
+   install); dev build + `npx expo start` only on the same Wi-Fi. Follow
+   `app/AGENTS.md` for Expo work.
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
    participants, includes anger) requested on Harvard Dataverse; TILES-2018
    account approved but its data-use agreement needs Prof. Zantout's

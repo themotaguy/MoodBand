@@ -343,7 +343,10 @@ supported as far as known; check during the API prototype (Open items).
   named SVM and a small neural network as alternatives).
 - **Ask before starting feedback**: the feedback module must get the user's
   explicit go-ahead before an intervention plays — not start automatically
-  when a suggestion is opened (refines Decision #13).
+  when a suggestion is opened (refines Decision #13). **Done Oct 21**: the
+  session screen asks **Start / Not now** first; "Not now" is logged as an
+  answer. The on-demand break and the recovery cue (a message, not an
+  exercise) skip the question. Tested on iPhone (test doc D1–D5).
 - **Mid-term presentation next week** — needs a deck.
 - **User trial confirmed**: data collection with friends as participants.
   Prof. Zantout is buying a Fitbit for the project and checking the user

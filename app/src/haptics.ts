@@ -13,6 +13,10 @@ export type HapticPattern = { description: string; segments: Segment[]; repeat: 
 export const patterns = catalog.haptic_patterns as Record<string, HapticPattern>;
 
 const SHARPNESS = 0.3; // soft, rounded feel for continuous vibration
+// The library's stop() shuts its haptic engine down asynchronously; starting a new
+// pattern immediately can be silenced when that shutdown completes. Wait this long.
+const RESTART_DELAY_MS = 150;
+let pending: ReturnType<typeof setTimeout> | undefined;
 const TAP_SHARPNESS = 0.8; // crisp, so a transient reads as a tap, not a buzz
 
 export function toEvents(pattern: HapticPattern): HapticEvent[] {
@@ -36,11 +40,27 @@ export function durationMs(pattern: HapticPattern): number {
 }
 
 export function play(pattern: HapticPattern) {
-  RNHapticFeedback.stop(); // never layer a new pattern on top of one still playing
-  RNHapticFeedback.triggerPattern(toEvents(pattern));
+  playFrom(pattern, 0);
+}
+
+/** Play the rest of a pattern from `offsetMs` in. iOS stops custom haptics when the
+ * app goes inactive (e.g. Notification Center), so sessions resume with this. */
+export function playFrom(pattern: HapticPattern, offsetMs: number) {
+  const events: HapticEvent[] = [];
+  for (const e of toEvents(pattern)) {
+    const end = e.time + (e.duration ?? 0);
+    if (e.type === 'continuous' && e.time < offsetMs && end > offsetMs) {
+      events.push({ ...e, time: 0, duration: end - offsetMs }); // cut the event in progress
+    } else if (e.time >= offsetMs) {
+      events.push({ ...e, time: e.time - offsetMs });
+    }
+  }
+  stop(); // never layer a new pattern on top of one still playing
+  if (events.length) pending = setTimeout(() => RNHapticFeedback.triggerPattern(events), RESTART_DELAY_MS);
 }
 
 export function stop() {
+  clearTimeout(pending);
   RNHapticFeedback.stop();
 }
 

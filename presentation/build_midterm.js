@@ -10,6 +10,8 @@ const React = require("react");
 const ReactDOMServer = require("react-dom/server");
 const sharp = require("sharp");
 const fa = require("react-icons/fa");
+const JSZip = require("jszip");
+const NOTES = require("./midterm_notes");
 
 const SKILL = process.env.PPTX_SKILL_DIR;
 const { applyTheme } = require(path.join(SKILL, "scripts/apply_theme.js"));
@@ -130,7 +132,7 @@ async function main() {
       { text: "Ritik Pravin Mota · M.S. Data Science", options: { breakLine: true } },
       { text: "Supervisor: Prof. Rached Zantout · Khoury College of Computer Sciences, Northeastern University" },
     ], { x: 0.6, y: 3.9, w: 8.8, h: 1.0, color: C.background1, fontSize: 14, paraSpaceAfter: 4 });
-    s.addNotes("MoodBand detects a user's mood from a Fitbit and responds with feedback they can see, hear or feel, designed from the start for both sighted and visually impaired users. In ten minutes: the problem and the idea, what's built so far, and what's left.");
+    s.addNotes(NOTES[0]);
   }
 
   // 2 — Problem
@@ -148,7 +150,7 @@ async function main() {
       T(s, head, { x: x + 0.3, y: 2.6, w: 2.3, h: 0.45, fontSize: 20, bold: true, fontFace: THEME.headFontFace });
       T(s, body, { x: x + 0.3, y: 3.15, w: 2.3, h: 1.55 });
     }
-    s.addNotes("Three gaps. First, most mood tools depend on self-report. Second, they track mood but don't help regulate it. Third, they're built for the screen: my literature review found screen readers don't reliably make these apps usable for visually impaired people. MoodBand targets all three.");
+    s.addNotes(NOTES[1]);
   }
 
   // 3 — Solution pipeline
@@ -170,7 +172,7 @@ async function main() {
     }
     await iconCircle(s, fa.FaFlask, 0.5, 4.45, 0.4, C.accent2, "Offline first");
     T(s, "Built and tested offline on public datasets first; the live Fitbit and the user trial come last.", { x: 1.05, y: 4.47, w: 8.4, h: 0.4, valign: "middle", color: C.text2 });
-    s.addNotes("The system is a four-stage loop. Sense: heart rate and steps from a Fitbit through Google's cloud API, which is why it works on both Android and iOS. Classify: a model reads the last 30 minutes of data. Decide: a cautious decision module chooses whether to say anything at all. Feedback: the phone delivers it through the channels that suit the user. Following my supervisor's advice, everything is built offline on public data before the live Fitbit.");
+    s.addNotes(NOTES[2]);
   }
 
   // ================= PROGRESS =================
@@ -194,7 +196,7 @@ async function main() {
       T(s, head, { x: x + 0.9, y: y + 0.27, w: 1.75, h: 0.45, fontSize: 16, bold: true, valign: "middle" });
       T(s, body, { x: x + 0.25, y: y + 0.88, w: 2.4, h: 0.75 });
     }
-    s.addNotes("Six milestones are done: the literature review with 23 references, the updated proposal, a first mood model, a benchmark of six models, the feedback-decision module, and an iPhone prototype tested end to end. The next slides cover each of the technical pieces.");
+    s.addNotes(NOTES[3]);
   }
 
   // 5 — First model
@@ -217,7 +219,7 @@ async function main() {
     T(s, "Chance is 0.25 (four moods)", { x: 6.3, y: 3.55, w: 2.9, h: 0.4, color: C.text2, italic: true });
     T(s, "Tried and dropped: last night's HRV and sleep (hurt accuracy on new people) and the PMData dataset (once-a-day labels too coarse).",
       { x: 0.5, y: 4.55, w: 9.0, h: 0.5, color: C.text2, fontSize: 13 });
-    s.addNotes("The model is trained on LifeSnaps, a public Fitbit dataset whose participants reported their mood several times a day. For each report I use heart rate and steps from the 30 minutes before it, which mirrors how the app will work live. Tested on people it has never seen, the Random Forest reaches 0.33 balanced accuracy against 0.25 chance: a real signal, but a modest one. Overnight HRV and a second dataset didn't help.");
+    s.addNotes(NOTES[4]);
   }
 
   // 6 — Benchmark chart
@@ -251,7 +253,7 @@ async function main() {
       T(s, head, { x: 6.45, y, w: 3.05, h: 0.35, bold: true, fontSize: 15 });
       T(s, body, { x: 6.45, y: y + 0.38, w: 3.05, h: 0.75 });
     }
-    s.addNotes("To check whether a more complex model helps, I compared six models on exactly the same data and splits. On plain predictions the SVM edges out the Random Forest on every split, mostly because it catches sad far more often. But the feedback module needs probabilities to decide when to act, and once the SVM gives them its advantage disappears: it drops to 0.320 and almost never predicts sad or stressed, so in the simulation it never suggested a break. So the Random Forest stays. Gradient boosting and a small neural network do worse. With about two thousand labels, model capacity isn't the bottleneck; the information in heart rate and steps is. I also tried adding the other signals the Google Health API offers: heart rate adjusted for activity, calories, exercise, and last night's sleep, HRV, oxygen and skin temperature. None of them improved accuracy on new people, and the overnight ones made it worse. So the limit is the signal and the number of people, not the model or the features. The next steps are more data and learning each user's own patterns.");
+    s.addNotes(NOTES[5]);
   }
 
   // 7 — Confusion matrices
@@ -278,7 +280,7 @@ async function main() {
     });
     T(s, "Share of each reported mood predicted as each class (rows sum to 100%), pooled over 5 seeds. Darker = larger share. Both models mix up neutral with stressed and happy; the SVM finds sad far more often.",
       { x: 0.5, y: 4.35, w: 9.0, h: 0.7, fontSize: 13, color: C.text2 });
-    s.addNotes("These confusion matrices show where the errors are. Read each row as: of the times people reported this mood, how often did the model predict each class. Both models confuse neutral with stressed and happy, which is expected since heart rate and steps can look similar across those states. On plain predictions the SVM's advantage is the sad row, 32 percent versus 17 percent, but as the previous slide showed, that advantage doesn't survive once it gives probabilities.");
+    s.addNotes(NOTES[6]);
   }
 
   // 8 — Interventions and profiles
@@ -308,7 +310,7 @@ async function main() {
       T(s, head, { x: 7.55, y: y + 0.12, w: 1.85, h: 0.32, bold: true, fontSize: 15 });
       T(s, body, { x: 7.55, y: y + 0.45, w: 1.85, h: 0.62, fontSize: 13 });
     }
-    s.addNotes("Each mood gets a response grounded in the literature where evidence exists: a vibration-paced breathing exercise for stress, and music that starts low and brightens for sadness. Where there's no evidence, for anger and for positive feedback, I've marked it as a design choice to test. Happy and neutral get no feedback at all, to avoid fatigue. On the right are the three accessibility profiles: blind users always get audio and vibration together.");
+    s.addNotes(NOTES[7]);
   }
 
   // 9 — Decision module
@@ -333,7 +335,7 @@ async function main() {
     T(s, [{ text: "match the reported mood", options: { breakLine: true } }, { text: "Chance: 1 in 4", options: { color: C.text2, italic: true } }], { x: 6.3, y: 3.8, w: 3.0, h: 0.55 });
     T(s, "Simulated on 1,295 real days (about 101,000 predictions). A stricter threshold cuts interruptions, not errors: the model's confidence doesn't track whether it's right, so asking first and learning from “Was this right?” matter.",
       { x: 0.5, y: 4.6, w: 9.0, h: 0.5, fontSize: 12, color: C.text2 });
-    s.addNotes("Because the model is modest, the decision module is deliberately cautious. It needs a confident, persistent prediction, ignores stress right after exercise, limits how often it speaks, and always asks before starting. I replayed predictions across 1,295 real days: it suggests a break about 1.2 times a day, and those suggestions match the person's reported mood about one time in three, versus one in four by chance. Raising the threshold didn't improve that, which tells us the confidence isn't calibrated. The 'Was this right?' answers are how it will learn each person.");
+    s.addNotes(NOTES[8]);
   }
 
   // 10 — iPhone prototype
@@ -364,7 +366,7 @@ async function main() {
       T(s, head, { x: x + 0.85, y: 3.5, w: 3.3, h: 0.45, bold: true, fontSize: 14, valign: "middle" });
       T(s, body, { x: x + 0.22, y: 4.05, w: 3.95, h: 0.75, fontSize: 13 });
     }
-    s.addNotes("The app is built in React Native, so one codebase covers Android and iOS. I've tested it end to end on an iPhone: a notification suggests a break, the user chooses to start, the break plays, and it ends by asking whether the suggestion was right. Testing changed the design twice. Phone vibration is only felt in the hand, so suggestions now arrive as a notification first. And VoiceOver overlapped with the app's own voice, so guidance is now spoken through VoiceOver.");
+    s.addNotes(NOTES[9]);
   }
 
   // ================= WHAT'S LEFT =================
@@ -375,7 +377,7 @@ async function main() {
     const s = content("What's left", "What's left");
     const cols = [
       [fa.FaDatabase, "Data and model", "Weeks 7–10", ["EmoPhone and TILES-2018 (anger)", "Train the five-mood model", "Re-run the benchmark"]],
-      [fa.FaPlug, "Integration", "Weeks 11–13", ["Model + decisions in the app", "Save answers as labels", "Live Fitbit via Google Health API"]],
+      [fa.FaPlug, "Integration", "Weeks 11–13", ["Done: model + decisions in the app (recorded days)", "Done: answers saved as labels", "Live Fitbit via Google Health API"]],
       [fa.FaUserCheck, "Trial and report", "Weeks 14–16", ["User trial, after consent", "Evaluate model and feedback", "Final report"]],
     ];
     for (const [i, [Ic, head, weeks, items]] of cols.entries()) {
@@ -387,7 +389,7 @@ async function main() {
       T(s, items.map((t, k) => ({ text: t, options: { bullet: { indent: 14 }, breakLine: k < items.length - 1 } })),
         { x: x + 0.25, y: 3.05, w: 2.45, h: 1.65, paraSpaceAfter: 6 });
     }
-    s.addNotes("Three phases remain, following the proposal's timeline. First, the data: anger is required, so I need the EmoPhone and TILES datasets, then I'll train the five-mood model and re-run the benchmark on each dataset. Second, integration: connect the model and decision module to the app, save the users' answers, and connect the live Fitbit through the Google Health API. Third, a user trial with volunteers once consent is in place, then evaluation and the final report.");
+    s.addNotes(NOTES[10]);
   }
 
   // 12 — Risks and support needed (closing)
@@ -406,12 +408,28 @@ async function main() {
       T(s, body, { x: 2.9, y, w: 6.6, h: 0.6, color: C.background1, valign: "middle" });
     });
     T(s, "Thank you. Questions?", { x: 0.5, y: 4.45, w: 9.0, h: 0.55, fontSize: 24, bold: true, color: C.background1, fontFace: THEME.headFontFace });
-    s.addNotes("The main risks: access to the datasets with anger labels, where the TILES agreement needs Northeastern's signature; the modest signal, which I'll address by learning from each user's answers; and a trial without visually impaired participants, which I state as a limitation. Thank you, happy to take questions.");
+    s.addNotes(NOTES[11]);
   }
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
+  await splitNoteLines(OUT);
   console.log("Wrote " + path.relative(ROOT, OUT));
+}
+
+// pptxgenjs writes each note as one paragraph with raw newlines, which PowerPoint and
+// Keynote may run together; split every note line into its own paragraph.
+async function splitNoteLines(file) {
+  const zip = await JSZip.loadAsync(fs.readFileSync(file));
+  for (const name of Object.keys(zip.files).filter(n => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(n))) {
+    const xml = await zip.file(name).async("string");
+    const fixed = xml.replace(/<a:p><a:r>(<a:rPr[^>]*\/>)<a:t>([^<]*)<\/a:t><\/a:r>(.*?)<\/a:p>/s, (m, rPr, txt, rest) =>
+      txt.split(/\r?\n/).map(line => line
+        ? `<a:p><a:r>${rPr}<a:t>${line}</a:t></a:r></a:p>`
+        : `<a:p><a:endParaRPr lang="en-US"/></a:p>`).join(""));
+    zip.file(name, fixed);
+  }
+  fs.writeFileSync(file, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

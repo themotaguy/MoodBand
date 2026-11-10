@@ -92,3 +92,47 @@ Fitbit (Inspire 3 recommended) bought by the supervisor; Google Health API,
 React Native/Expo, Firebase free tier: $0; **Apple Developer Program $99/year**
 (TestFlight for trial participants — free signing expires after 7 days);
 miscellaneous $50; contingency $15. **Total ≈ $164** excluding the Fitbit.
+
+## Changes since mk3 (for the next proposal revision)
+
+What has happened since mk3 was sent (Oct 21, 2026). The next revision of
+the proposal should take these in; detail is in `decisions.md`.
+
+- **Model benchmark done** (§7.2; #15): six models compared on identical
+  participant-grouped splits. RBF SVM 0.351, Random Forest 0.334, logistic
+  regression 0.316, small neural network 0.311, gradient boosting 0.297,
+  majority class 0.250 (balanced accuracy, 5 seeds). Confusion matrices for
+  every model.
+- **Extra Fitbit signals don't help** (#16): activity-adjusted heart rate,
+  calories, exercise, longer context and last night's sleep, HRV, SpO2 and
+  skin temperature don't beat the 12 heart-rate-and-steps features for
+  unseen people; the overnight ones lower accuracy by 0.02–0.05. Heart rate
+  + motion stays the real-time input.
+- **The Random Forest stays the model** (#17): the SVM's lead disappears once
+  it gives the probabilities the feedback module needs (0.320; never predicts
+  sad), and in the feedback replay it suggests no breaks at all.
+- **Combining models and personalization** (#19), answering Prof. Zantout's
+  mid-term question: voting and stacking don't raise usable accuracy. Using
+  a person's past moods would (~0.33 → 0.40–0.43), but mostly by learning
+  their usual moods rather than reading their body, so it is **ruled out**.
+- **Project aim stated as a proof of concept** (#20): MoodBand tests whether
+  mood can be reliably predicted from physiological signals; if it can, the
+  next step after the capstone is a custom wearable. The model therefore
+  uses physiological and motion signals only, never past mood reports, and
+  is evaluated on unseen people. The proposal's aim and objectives should
+  say this explicitly.
+- **Offline integration done ahead of the timeline** (Table 5, weeks 11–13;
+  #18): the app's Replay mode plays recorded LifeSnaps days through the real
+  model and decision module (running on the laptop), delivers each
+  suggestion as a notification, and saves every answer. Tested on iPhone.
+  The session's first screen now offers **Start / Not now / Snooze for an
+  hour** (§7.3–7.4).
+- **Mid-term presentation** given Oct 28, 2026 (well received).
+- **Fitbit arrived** (by Nov 9): next are the Google Health API prototype
+  (heart-rate resolution, whether HRV is overnight-only, sign-in on Android
+  and iOS) and the wrist-alert test.
+- **Data access** (§7.2): EmoPhone still pending (follow-up email being
+  sent); TILES-2018 data-use agreement still with Prof. Zantout. Anger
+  remains required, so the five-mood model waits on these.
+- **User trial**: starts once the consent agreement is in place
+  (unchanged).

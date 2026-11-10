@@ -12,6 +12,12 @@ don't re-derive decisions already made below.
 
 ## What MoodBand does
 
+**MoodBand is a proof of concept** (`docs/decisions.md` #20): can a user's
+mood be reliably predicted from physiological markers? If so, the next step
+after the capstone is a custom wearable. So the model uses physiological and
+motion signals only, **never the user's past moods or answers as inputs**
+(no "prior shift" or per-person mood base rates, #19).
+
 MoodBand senses a user's physiological and motion signals from an existing
 consumer wearable, classifies their mood in real time into one of five
 categories (**happy, neutral, sad, stressed, angry**), and responds with a
@@ -59,22 +65,27 @@ Not yet done / in progress:
    Replay mode built (#18): the app plays recorded days through the model
    and decision module (`feedback/server.py` on the laptop); answers saved.
    Tested on iPhone Oct 21 (`docs/replay-test.md`; VoiceOver checks left).
-   **Next**: mid-term presentation (Oct 28); then the Google Health API
-   prototype (task 3). Builds: standalone `npx expo run:ios --device --configuration
+   Mid-term presented Oct 28 (went well). Prof. Zantout asked about higher
+   accuracy → #19: combining models doesn't help; using a person's past
+   moods would, but is ruled out (#20). **Fitbit arrived (Nov 9).**
+   **Next**: the Google Health API prototype (task 3) and the wrist-alert
+   test; the proposal is being revised in claude.ai (what's changed since
+   mk3: end of `docs/proposal-summary.md`). Builds: standalone `npx expo run:ios --device --configuration
    Release` (no dev server needed; free signing expires 7 days after
    install); dev build + `npx expo start` only on the same Wi-Fi. Follow
    `app/AGENTS.md` for Expo work.
 2. **More training data (pending access).** EmoPhone (Fitbit, ~300
-   participants, includes anger) requested on Harvard Dataverse; TILES-2018
-   account approved but its data-use agreement needs Prof. Zantout's
-   signature. See `docs/datasets.md`. Questions for the weekly Wednesday
+   participants, includes anger) requested on Harvard Dataverse (Nov 9:
+   follow-up email to the EmoPhone team); TILES-2018 account approved but
+   its data-use agreement still needs Prof. Zantout's signature. See `docs/datasets.md`. Questions for the weekly Wednesday
    supervisor meeting are tracked under "Open items" in `docs/decisions.md`.
 3. **Prototype against the Google Health API** to confirm it actually
    supports what the proposal assumes, and flag any missing pieces (e.g.,
    confirm real-time HR resolution, confirm HRV truly is overnight-only
    under the *new* API, confirm OAuth/auth flow works end-to-end). Per the
    build order, this comes after the offline pipeline (model, feedback
-   module, app) works.
+   module, app) works. **Started Nov 9**: `healthapi/probe.py` (laptop,
+   standard library); setup and checklist in `docs/google-health-api.md`.
 4. Prof. Zantout was separately checking with Dr. Yoon about a possibly
    related wearable project elsewhere on campus — informational, no action
    needed from the code side.

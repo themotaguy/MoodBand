@@ -83,8 +83,10 @@ Full reasoning for each is in [Docs/decisions.md](Docs/decisions.md).
 - [x] PMData cross-dataset check — inconclusive (Decision #10)
 - [x] Literature review extended with intervention and feedback-timing research (final: mk5)
 - [x] Feedback-decision module, tuned by simulation (Decision #11)
-- [ ] Mobile companion app (accessible, screen-reader compatible)
-- [ ] Offline end-to-end integration
+- [x] Model benchmark, feature experiment, calibration check, combining models and personalization (Decisions #15–#17, #19)
+- [x] Mobile companion app (accessible, screen-reader compatible), tested on iPhone (Decisions #12–#13)
+- [x] Offline end-to-end integration: replay mode (Decision #18)
+- [x] Mid-term presentation (Oct 28, 2026)
 - [ ] Google Health API integration (confirm 5-second HR, overnight-only HRV, OAuth on Android and iOS)
 - [ ] User evaluation with sighted and visually impaired participants
 
@@ -111,6 +113,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 
 **RF vs SVM probabilities (Decision #17):** with the Platt-scaled probabilities the feedback module needs, the SVM drops to 0.320 balanced accuracy and almost never predicts sad (0%) or stressed (7%), so the feedback replay suggests no breaks at all. The Random Forest stays the model. Results: `model/results/calibration/`.
 
+**Combining models and personalization (Decision #19):** soft voting (RF + LR + boosting, ± MLP) is no better than the Random Forest, and stacking's small gain (0.341) comes with probabilities too flat for the feedback module to act on (3% of predictions reach 0.45). Reweighting by a person's own past moods ("prior shift") would raise balanced accuracy to 0.40–0.43, but controls show most of that comes from learning their usual moods (the sensor readings add 0.04–0.07), so it is ruled out: MoodBand is a proof of concept for predicting mood from physiological signals only (Decision #20). Chart: `model/results/ensemble/ensemble.png`.
+
 **Replay mode (Decision #18):** the app's Replay screen plays a recorded LifeSnaps day at one hour per minute. The Random Forest's held-out predictions and the decision module run on the laptop (`feedback/server.py`), each suggestion arrives as a scheduled notification, and answers are stored on the phone and saved on the laptop. Test checklist: `Docs/replay-test.md`.
 
 **Cross-dataset check (PMData):** applying the model to PMData shows no meaningful relationship with its daily mood and stress scores. A model trained on PMData itself doesn't find one either, so PMData's once-a-day, mostly post-wake ratings can't settle whether the model generalizes (Decision #10).
@@ -136,6 +140,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── results/feature_experiment/  # Feature experiment results + chart
 │   ├── calibration.py        # RF vs SVM probability calibration
 │   ├── results/calibration/  # Calibration summary + reliability chart
+│   ├── ensemble.py           # Combining models + personalization (Decision #19)
+│   ├── results/ensemble/     # Results + chart
 │   └── requirements.txt
 ├── feedback/
 │   ├── interventions.json    # Feedback catalog: haptic patterns, audio, visuals, per profile
@@ -144,7 +150,8 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── replay.py             # One recorded day through model + decision module (replay mode)
 │   ├── server.py             # Laptop server the app's Replay screen talks to
 │   └── tests/                # Guardrail and accessibility tests
-├── app/                      # React Native (Expo) companion app — haptics prototype so far
+├── healthapi/probe.py        # Google Health API prototype (Docs/google-health-api.md)
+├── app/                      # React Native (Expo) companion app
 ├── data/                     # Datasets (gitignored — download separately)
 ├── CLAUDE.md                 # Project context for Claude Code
 └── README.md
@@ -166,6 +173,7 @@ python3 -m venv .venv
 .venv/bin/python model/benchmark.py           # model comparison + confusion matrices (~5 min)
 .venv/bin/python model/feature_experiment.py  # extra feature groups (needs calories/exercise extract)
 .venv/bin/python model/calibration.py         # RF vs SVM probabilities (~5 min)
+.venv/bin/python model/ensemble.py            # combining models + personalization (~15 min)
 .venv/bin/python feedback/simulate.py --model svm  # feedback replay with SVM probabilities
 .venv/bin/python model/pmdata.py              # optional: PMData (data/pmdata/) → minute files, ~25 s
 .venv/bin/python model/evaluate_pmdata.py     # optional: cross-dataset check

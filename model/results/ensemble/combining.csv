@@ -1,0 +1,5 @@
+method,balanced_accuracy,macro_f1,share_confident,recall_happy,recall_neutral,recall_sad,recall_stressed,balanced_accuracy_sd
+Random Forest,0.3338,0.3268,0.2615,0.4814,0.3297,0.1719,0.3523,0.0059
+Voting: RF + LR + boosting,0.3288,0.3264,0.3408,0.4676,0.3533,0.1469,0.3475,0.0058
+Voting: RF + LR + boosting + MLP,0.3313,0.3274,0.2094,0.4516,0.3612,0.1734,0.3392,0.006
+Stacking (4 models),0.3414,0.3002,0.0305,0.3022,0.2178,0.3656,0.4799,0.0082

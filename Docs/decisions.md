@@ -525,11 +525,119 @@ Test checklist: `Docs/replay-test.md` (VoiceOver checks still to do).
 
 ---
 
+## 19. Higher accuracy: combining models doesn't help; past moods would, but are ruled out
+
+**Context**: the mid-term presentation (Oct 28, 2026) went well. Prof.
+Zantout asked whether accuracy could be raised, perhaps with different models
+or several models combined. `model/ensemble.py` tests both that and
+personalization on the benchmark's data and splits (#15: LifeSnaps, 1,961
+reports, 61 people, participant-grouped 5-fold CV, 5 seeds). Everything is
+scored on the argmax of the predicted probabilities, since those are what the
+feedback module acts on (#17).
+
+**A. Combining models** (people the model has never seen):
+
+| Method | Balanced acc. | Macro-F1 | Predictions ≥ 0.45 |
+|---|---|---|---|
+| Random Forest alone | 0.334 | 0.327 | 26% |
+| Soft voting: RF + LR + boosting | 0.329 | 0.326 | 34% |
+| Soft voting: RF + LR + boosting + MLP | 0.331 | 0.327 | 21% |
+| Stacking (4 models, inner grouped CV) | 0.341 | 0.300 | **3%** |
+
+Voting is no better than the RF. Stacking gains 0.007 (sd 0.008), but its
+macro-F1 is lower and its probabilities are so flat that only 3% of
+predictions reach the 0.45 confidence gate, so the feedback module would
+almost never act. This is the same failure as the calibrated SVM (#17).
+
+**B. Learning each person.** For each held-out person, their first K reports
+in time stand in for labels they would give the app. Every method is scored
+on the same later reports:
+
+| First K reports used | 10 (34 people) | 20 (25 people) | 40 (15 people) |
+|---|---|---|---|
+| Global RF (other people only) | 0.341 | 0.332 | 0.307 |
+| **Prior shift**: global RF reweighted by the person's own mood mix | **0.398** | **0.415** | **0.434** |
+| Personal weighting: RF retrained with the person's reports ×10 | 0.370 | 0.379 | 0.374 |
+| *Control: always the person's most common mood (no sensors)* | 0.378 | 0.348 | 0.446 |
+| *Control: prior shift with readings scrambled* | 0.330 | 0.345 | 0.391 |
+
+Prior shift is the best method and the simplest: count how often the person
+reports each mood, then reweight the global model's probabilities by that mix.
+It raises balanced accuracy from about 0.33 to 0.40–0.43. **But the controls
+show where the gain comes from.** Guessing the person's usual mood with no
+sensor data already beats the global model at every K, and matches prior
+shift at K = 40. The sensor readings add 0.04–0.07 on top of the mood mix
+(prior shift vs scrambled). So most of the gain is knowing who the person is,
+not reading their moment. Only that smaller within-person part can time a
+suggestion: a model that always says "usual mood" never changes, so it
+cannot tell *when* to act.
+
+**Decision** (Nov 9, 2026):
+- **Keep the single Random Forest**; don't adopt voting or stacking.
+- **Don't use prior shift, or any use of a person's past moods to predict
+  their current mood.** MoodBand is a proof of concept for predicting mood
+  from physiological signals (Decision #20). A model that leans on the
+  person's usual moods would make its accuracy say less about the signals.
+  The experiment is kept as evidence of what the signals carry: on top of
+  knowing a person's mood mix, the heart-rate and step readings add
+  0.04–0.07 (prior shift vs its scrambled control).
+- **Answer to Prof. Zantout**: different or combined models don't raise
+  accuracy on this data. Using a person's past moods would (0.33 → about
+  0.40–0.43), but mostly by learning their usual moods rather than reading
+  their body, so it's ruled out for this proof of concept. More data with
+  anger (EmoPhone, TILES-2018) is the lever that keeps the model
+  physiological-only.
+
+**Limits**:
+- Few people have 40+ reports (15), so the K = 40 column is noisy.
+- `hr_rel` and `hr_z` already normalize by each person's whole-period heart
+  rate. That's a *physiological* baseline (the person's own heart rate), not
+  their past moods, so it fits the proof-of-concept aim.
+- Personal weighting (retraining with a person's own labelled reports) also
+  absorbs their mood mix, so it's set aside for the same reason.
+
+Results: `model/results/ensemble/` (`combining.csv`, `personal.csv`,
+`ensemble.png`).
+
+---
+
+## 20. Project aim: a proof of concept for predicting mood from physiological signals
+
+**Context** (Nov 9, 2026, from the student after #19): MoodBand is a
+**proof of concept**. It tests whether a user's mood can be reliably
+predicted from physiological markers. If it succeeds, the next step (after
+this capstone) is building a custom wearable. This complements Decision #1:
+the capstone uses an existing consumer wearable (Fitbit) instead of custom
+hardware, and that remains the plan for this project.
+
+**Decision**:
+- The mood model uses **physiological and motion signals only**: heart rate,
+  steps, and per-person *physiological* baselines such as the person's own
+  average heart rate. It does **not** use a person's past mood reports or
+  answers to predict their current mood (no prior shift, no per-person mood
+  base rates; #19).
+- The headline evaluation is the physiological-only model on people it has
+  never seen (participant-grouped CV, balanced accuracy vs chance). This is
+  the number that tells a future custom wearable what the signals can do.
+- "Was this right?" answers stay as **evaluation labels** (did the
+  suggestion match the user's mood?), not model inputs. Whether they may be
+  used to retrain a physiological model per person is not decided; that
+  would also absorb the person's mood mix (#19).
+- The feedback loop and accessibility (CLAUDE.md) stay in scope: they are
+  how the proof of concept is used and tested.
+
+---
+
 ## Open items / things to verify before trusting the above
 
 - [ ] **Confirm the new Google Health API's actual behavior** — does it
   really provide 5-second HR resolution with no approval step? Is HRV still
   overnight-only, or has that changed? (Ties to Decision #2 and #3.)
+  Nov 9: prototype built (`healthapi/probe.py`), setup and checklist in
+  `Docs/google-health-api.md`. The docs list a 1-second storage resolution
+  for heart rate and don't say whether HRV is sleep-only, so both need the
+  Inspire 3's own data. The API only has data after the band syncs, so the
+  delay behind real time is also a check.
 - [ ] **Wrist alerts via Fitbit notification mirroring** (Decision #13) — when
   the Fitbit (Inspire 3 recommended, Oct 21) arrives: enable MoodBand under
   Fitbit app → device → Notifications → App Notifications, then check that a
@@ -558,8 +666,12 @@ Test checklist: `Docs/replay-test.md` (VoiceOver checks still to do).
   (Decision #14): update the proposal and share it with Prof. Zantout.
 - [ ] **User trial agreement** (human-subjects / consent) — Prof. Zantout
   checking; student to remind him. Trial confirmed with friends as
-  participants (Decision #14).
-- [ ] **Fitbit for the project** — Prof. Zantout buying one; student to send
-  a link.
+  participants (Decision #14). Nov 9: the trial starts once it is in place.
+- [ ] **EmoPhone access** — still pending (requested Oct 15). Nov 9: student
+  emailing the EmoPhone team for an update. TILES-2018 DUA still with Prof.
+  Zantout.
+- [x] ~~**Fitbit for the project** — Prof. Zantout buying one; student to send
+  a link.~~ **Arrived by Nov 9, 2026.** Unblocks the wrist-alert test and
+  the Google Health API prototype.
 - [ ] (Informational, not blocking) Prof. Zantout was checking with Dr. Yoon
   about a possibly related wearable project elsewhere on campus.

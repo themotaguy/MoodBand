@@ -20,6 +20,8 @@ FILES = [
     ("Docs/datasets.md", "Training datasets and access status"),
     ("Docs/proposal-summary.md", "Proposal summary and divergences"),
     ("Docs/haptics-prototype-test.md", "iPhone prototype test checklist and results"),
+    ("Docs/replay-test.md", "Replay mode test checklist and results"),
+    ("Docs/google-health-api.md", "Google Health API prototype setup and checklist"),
     ("README.md", "Repository README (results, structure, setup)"),
 ]
 

@@ -2,7 +2,7 @@
 // answers, the replay server's address and the replay that is playing. Profile,
 // server and answers are kept on the phone (AsyncStorage), so they survive restarts;
 // replay answers are also sent to the laptop (feedback/server.py), retried until it
-// accepts them. Answers are evaluation labels, not model inputs (decisions.md #20).
+// accepts them. Answers are evaluation and personalization labels, never model inputs (decisions.md #20).
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
 

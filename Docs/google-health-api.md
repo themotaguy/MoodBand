@@ -16,7 +16,9 @@ everything it stores (the OAuth client, the sign-in token) stays in
   times the band wasn't worn. Up to 10,000 points per page.
 - **Heart rate** (`heart-rate`): point-in-time samples with beats per minute,
   motion context and sensor location. Storage resolution is listed as
-  **1 second**. How often the Inspire 3 actually samples is not documented.
+  **1 second**. Google's Inspire 3 spec sheet (Memory section) says the band
+  stores heart rate every **1 second during exercise tracking and every 5
+  seconds at other times**; check 2 confirms this on the band's own data.
 - **HRV** (`heart-rate-variability`): samples of RMSSD in milliseconds. The
   type is listed under both the Vitals and the Sleep guides, but the docs
   **don't say whether it is recorded only during sleep**. Daily HRV
@@ -41,7 +43,8 @@ Sources: [Vitals data types](https://developers.google.com/health/data-types/vit
 [list](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/list),
 [reconcile](https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/reconcile),
 [Set up Google Cloud and OAuth](https://developers.google.com/health/setup),
-[First API call codelab](https://developers.google.com/health/codelabs/make-your-first-api-call).
+[First API call codelab](https://developers.google.com/health/codelabs/make-your-first-api-call),
+[Inspire 3 technical specs](https://store.google.com/product/fitbit_inspire_3_specs).
 
 ## Setup (once, about 15 minutes)
 
@@ -69,8 +72,10 @@ you pair the Inspire 3, since the data belongs to that account.
    *Continue*, then allow all three permissions. The terminal should say
    **granted** for each scope and **refresh token: yes**.
 
-Steps 1–4 work **before the band is paired**: calls then return 0 points,
-which already confirms the sign-in, the scopes and the endpoints.
+Steps 1–4 work **before the band is paired**, but data calls don't: until
+the Google account has a Fitbit / Google Health profile, every call returns
+400 `ACCOUNT_NOT_LINKED` (found Nov 10). If sign-in says `access_denied`,
+the account is missing from Audience › Test users.
 
 ## After pairing the Inspire 3
 
@@ -87,8 +92,8 @@ which already confirms the sign-in, the scopes and the endpoints.
 
 | # | Check | Assumed in the proposal | Result / notes |
 |---|---|---|---|
-| 1 | Sign-in works end to end from the laptop (all 3 scopes granted, refresh token issued) | Yes | |
-| 1b | Calls succeed with the band not yet paired (0 points, no errors) | — | |
+| 1 | Sign-in works end to end from the laptop (all 3 scopes granted, refresh token issued) | Yes | ✅ (Nov 10). First try was blocked (403 `access_denied`) until the account was added under Audience › Test users |
+| 1b | Calls succeed with the band not yet paired (0 points, no errors) | — | ✅ (Nov 11): all 6 types return 0 points, no errors. First needed a Fitbit / Google Health profile on the account (Nov 10: every call returned 400 `ACCOUNT_NOT_LINKED` until the Fitbit app was set up with the same Google account) |
 | 2 | Heart-rate sampling interval, and gaps during the day | ~5 s, continuous | |
 | 2b | `reconcile` vs `list`: same points, or duplicates removed? | — | |
 | 3 | Step interval length | 1 min | |

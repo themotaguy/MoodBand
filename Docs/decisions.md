@@ -574,8 +574,8 @@ cannot tell *when* to act.
 
 **Decision** (Nov 9, 2026):
 - **Keep the single Random Forest**; don't adopt voting or stacking.
-- **Don't use prior shift, or any use of a person's past moods to predict
-  their current mood.** MoodBand is a proof of concept for predicting mood
+- **Don't use prior shift, or any other use of a person's past moods as an
+  input to predict their current mood.** MoodBand is a proof of concept for predicting mood
   from physiological signals (Decision #20). A model that leans on the
   person's usual moods would make its accuracy say less about the signals.
   The experiment is kept as evidence of what the signals carry: on top of
@@ -594,7 +594,9 @@ cannot tell *when* to act.
   rate. That's a *physiological* baseline (the person's own heart rate), not
   their past moods, so it fits the proof-of-concept aim.
 - Personal weighting (retraining with a person's own labelled reports) also
-  absorbs their mood mix, so it's set aside for the same reason.
+  partly absorbs their mood mix. Nov 11: it is kept as a personalization
+  layer on top of the general model, reported separately (Decision #20).
+  Prior shift stays ruled out.
 
 Results: `model/results/ensemble/` (`combining.csv`, `personal.csv`,
 `ensemble.png`).
@@ -619,10 +621,25 @@ hardware, and that remains the plan for this project.
 - The headline evaluation is the physiological-only model on people it has
   never seen (participant-grouped CV, balanced accuracy vs chance). This is
   the number that tells a future custom wearable what the signals can do.
-- "Was this right?" answers stay as **evaluation labels** (did the
-  suggestion match the user's mood?), not model inputs. Whether they may be
-  used to retrain a physiological model per person is not decided; that
-  would also absorb the person's mood mix (#19).
+- **Personalization is a layer on top of the general model, not a
+  replacement** (clarified Nov 11). Three kinds are in scope:
+  1. **Personal body baselines**: compare readings with the user's own
+     normal heart rate and activity (already partly in the features:
+     `hr_rel`, `hr_z`). Uses no mood labels.
+  2. **Retraining on the user's own labels**: update the physiological model
+     with the user's labelled moments ("Was this right?" answers, trial mood
+     check-ins), as in #19's personal weighting (0.37–0.38 vs 0.33 for the
+     general model). The inputs stay physiological; the labels are training
+     targets. Because it partly learns the user's usual moods, it is
+     **reported separately** from the headline result.
+  3. **Personalized feedback**: learn from answers which intervention,
+     vibration pattern, timing or confidence threshold suits each user. This
+     changes what MoodBand does, not what mood it predicts.
+- **Ruled out**: mood-mix reweighting (prior shift, #19), and any past mood
+  or answer used as an *input feature*.
+- "Was this right?" answers are **evaluation labels** (did the suggestion
+  match the user's mood?) and **training labels** for personalization kind 2;
+  never model inputs.
 - The feedback loop and accessibility (CLAUDE.md) stay in scope: they are
   how the proof of concept is used and tested.
 

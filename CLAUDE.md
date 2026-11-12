@@ -16,7 +16,10 @@ don't re-derive decisions already made below.
 mood be reliably predicted from physiological markers? If so, the next step
 after the capstone is a custom wearable. So the model uses physiological and
 motion signals only, **never the user's past moods or answers as inputs**
-(no "prior shift" or per-person mood base rates, #19).
+(no "prior shift" or per-person mood base rates, #19). Personalization is a
+**layer on top of the general model**, reported separately from it: personal
+body baselines, retraining on the user's own labels, and personalized
+feedback (#20).
 
 MoodBand senses a user's physiological and motion signals from an existing
 consumer wearable, classifies their mood in real time into one of five

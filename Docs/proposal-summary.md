@@ -120,7 +120,11 @@ the proposal should take these in; detail is in `decisions.md`.
   next step after the capstone is a custom wearable. The model therefore
   uses physiological and motion signals only, never past mood reports, and
   is evaluated on unseen people. The proposal's aim and objectives should
-  say this explicitly.
+  say this explicitly. **Personalization stays, as a layer on top of the
+  general model** (clarified Nov 11): personal body baselines, retraining on
+  the user's own labelled moments ("Was this right?", trial check-ins), and
+  personalized feedback. It is reported separately from the general model.
+  Only mood-mix reweighting (prior shift) is ruled out.
 - **Offline integration done ahead of the timeline** (Table 5, weeks 11–13;
   #18): the app's Replay mode plays recorded LifeSnaps days through the real
   model and decision module (running on the laptop), delivers each

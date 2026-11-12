@@ -166,7 +166,12 @@ def get(path, params=None):
         with urllib.request.urlopen(req) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"{e.code} on {path}: {e.read().decode(errors='replace')[:500]}") from None
+        detail = e.read().decode(errors="replace")
+        if "ACCOUNT_NOT_LINKED" in detail:
+            # Signed in fine, but this Google account has no Fitbit / Google Health profile yet.
+            sys.exit("This Google account isn't linked to Google Health yet: set it up in the Fitbit app "
+                     "(or https://fitbit.google.com/auth/signup) with the same account, then retry.")
+        raise RuntimeError(f"{e.code} on {path}: {detail[:500]}") from None
 
 
 def time_filter(type_id, start, end):

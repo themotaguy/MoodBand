@@ -150,14 +150,16 @@ An early baseline: consistently better than chance, but heart rate and steps car
 │   ├── replay.py             # One recorded day through model + decision module (replay mode)
 │   ├── server.py             # Laptop server the app's Replay screen talks to
 │   └── tests/                # Guardrail and accessibility tests
-├── healthapi/probe.py        # Google Health API prototype (Docs/google-health-api.md)
+├── healthapi/
+│   ├── probe.py              # Google Health API prototype: sign-in + checks (Docs/google-health-api.md)
+│   ├── live.py               # Live pipeline: API → 30-min window → RF → decision module
+│   └── tests/                # Minute aggregation and pipeline tests
 ├── app/                      # React Native (Expo) companion app
 ├── data/                     # Datasets (gitignored — download separately)
 ├── CLAUDE.md                 # Project context for Claude Code
 └── README.md
 ```
 
-The `sensing/` directory (Google Health API integration) will be added when that phase begins.
 
 ## Getting started (model)
 

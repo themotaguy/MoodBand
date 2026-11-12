@@ -89,6 +89,11 @@ Not yet done / in progress:
    build order, this comes after the offline pipeline (model, feedback
    module, app) works. **Started Nov 9**: `healthapi/probe.py` (laptop,
    standard library); setup and checklist in `docs/google-health-api.md`.
+   **Live pipeline skeleton (Nov 11)**: `healthapi/live.py` (API or a
+   recorded LifeSnaps day → minute series → 30-min window → RF → decision
+   module → `data/live/log.jsonl`, served at `GET /live`); 11 tests
+   (`python -m unittest discover -s healthapi/tests -t .`). First API tick
+   returned real heart rate. The phone side (polling `/live`) isn't built.
 4. Prof. Zantout was separately checking with Dr. Yoon about a possibly
    related wearable project elsewhere on campus — informational, no action
    needed from the code side.

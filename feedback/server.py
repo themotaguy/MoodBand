@@ -3,6 +3,7 @@
   GET  /days                      demo days (most suggestions matching a real report first)
   GET  /replay?id=<id>&date=<d>   one day's timeline (replay.timeline)
   POST /answers                   one "Was this right?" answer, appended to data/replay/answers.csv
+  GET  /live?since=<iso time>     live pipeline decisions after `since` (healthapi/live.py's log)
 
 The phone and the laptop must be on the same Wi-Fi; the app is pointed at the
 address printed on start-up.
@@ -22,6 +23,7 @@ from urllib.parse import parse_qs, urlparse
 import pandas as pd
 
 from feedback import replay
+from healthapi.live import read_log
 
 ROOT = Path(__file__).resolve().parent.parent
 ANSWERS = ROOT / "data" / "replay" / "answers.csv"
@@ -68,6 +70,9 @@ def make_handler(preds, reports, days):
             url = urlparse(self.path)
             if url.path == "/days":
                 return self._send(200, days)
+            if url.path == "/live":
+                since = parse_qs(url.query).get("since", [None])[0]
+                return self._send(200, read_log(since=since))
             if url.path == "/replay":
                 q = {k: v[0] for k, v in parse_qs(url.query).items()}
                 try:

@@ -88,6 +88,35 @@ the account is missing from Audience › Test users.
 3. `.venv/bin/python healthapi/probe.py probe --days 2`: answers the checks below.
    For check 5, note the time of the last sync shown in the Fitbit app.
 
+## Live pipeline (Nov 11)
+
+`healthapi/live.py` runs the four stages on the laptop every 10 minutes:
+fetch heart rate and steps → per-minute series (same shape as the LifeSnaps
+training data) → the model's 12 features for the 30 minutes ending now →
+Random Forest → `FeedbackDecider` → one line in `data/live/log.jsonl`
+(gitignored), which `feedback/server.py` serves at `GET /live?since=<time>`.
+
+- `hr_rel` / `hr_z` use the person's own mean and spread over the last 14
+  days (`--baseline-days`), the "personal body baselines" of decisions.md #20.
+- Each tick re-reads the last 2 hours, because data arrives only after a
+  sync; a later sync replaces minutes already seen.
+- Under 50% heart-rate coverage in the window → `no_data`, with the lag to
+  the newest sample (check 5). Network or API errors → `fetch_error`; the
+  loop keeps going.
+- `--source recorded` plays one LifeSnaps day on a simulated clock to test
+  the plumbing. The saved model saw every LifeSnaps participant, so that
+  output isn't an evaluation.
+- Not built yet: the phone polling `/live` and showing the suggestion.
+
+Run: `.venv/bin/python -m healthapi.live --source api` (`--once` for one
+tick) or `--source recorded`. Tests: `python -m unittest discover -s
+healthapi/tests -t .`
+
+First API tick (Nov 11, 22:16): real heart rate came back, newest sample 8
+minutes old, so the band is syncing. The parsers' field names
+(`sampleTime.physicalTime`, `beatsPerMinute`, steps `count`) still need
+`probe.py raw` to confirm, since `first_number` falls back to any number.
+
 ## Checklist
 
 | # | Check | Assumed in the proposal | Result / notes |

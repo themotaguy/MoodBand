@@ -98,7 +98,8 @@ class ApiSource:
 
     def fetch(self, start, end):
         p = self.probe
-        utc = lambda t: t.astimezone(timezone.utc)  # noqa: E731
+        # The pipeline's times are naive local; Python reads a naive datetime as local time.
+        utc = lambda t: pd.Timestamp(t).to_pydatetime().astimezone(timezone.utc)  # noqa: E731
         hr = []
         for dp in p.points("heart-rate", utc(start), utc(end)):
             b = p.body(dp, "heart-rate")
@@ -148,7 +149,8 @@ class Pipeline:
 
     def _update(self, now):
         start = now - self.baseline if self.fetched_until is None else self.fetched_until - REFETCH
-        samples, intervals = self.source.fetch(start, now)
+        # Up to the end of the current minute: training windows include the report's own minute.
+        samples, intervals = self.source.fetch(start, now + pd.Timedelta(minutes=1))
         self.hr = merge_minutes(self.hr, hr_minutes(samples), "minute")
         self.steps = merge_minutes(self.steps, step_minutes(intervals), None)
         keep = now - self.baseline
@@ -201,9 +203,12 @@ def read_log(path=LOG, since=None):
 
 
 def show(r):
-    if r["reason"] in ("no_data", "fetch_error"):
-        print(f"{r['time'][11:16]}  {r['reason']}" + (f"  (latest HR {r['lag_min']} min ago)" if r.get("lag_min") is not None else
-                                                      f"  {r.get('error', '')}"), flush=True)
+    if r["reason"] == "fetch_error":
+        print(f"{r['time'][11:16]}  fetch_error  {r['error']}", flush=True)
+        return
+    if r["reason"] == "no_data":
+        lag = f"latest HR {r['lag_min']} min ago" if r["lag_min"] is not None else "no HR yet"
+        print(f"{r['time'][11:16]}  no_data  (HR in under half of the last 30 min; {lag})", flush=True)
         return
     p = "  ".join(f"{m} {v:.2f}" for m, v in r["probabilities"].items())
     fired = f"  -> {r['intervention']}" if r["intervention"] else ""

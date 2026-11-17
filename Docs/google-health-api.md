@@ -6,7 +6,7 @@ proposal assumes, before building the live connection. The prototype is
 everything it stores (the OAuth client, the sign-in token) stays in
 `data/google_health/`, which git ignores.
 
-**Device**: Fitbit Inspire 3 (arrived by Nov 9, 2026; not yet paired).
+**Device**: Fitbit Inspire 3 (arrived by Nov 9, 2026; paired and worn from about Nov 11).
 
 ## What the documentation says (read Nov 9, 2026)
 
@@ -113,9 +113,8 @@ tick) or `--source recorded`. Tests: `python -m unittest discover -s
 healthapi/tests -t .`
 
 First API tick (Nov 11, 22:16): real heart rate came back, newest sample 8
-minutes old, so the band is syncing. The parsers' field names
-(`sampleTime.physicalTime`, `beatsPerMinute`, steps `count`) still need
-`probe.py raw` to confirm, since `first_number` falls back to any number.
+minutes old. The parsers' field names were confirmed with `probe.py raw` on
+Nov 16.
 
 ## Checklist
 
@@ -123,13 +122,13 @@ minutes old, so the band is syncing. The parsers' field names
 |---|---|---|---|
 | 1 | Sign-in works end to end from the laptop (all 3 scopes granted, refresh token issued) | Yes | ✅ (Nov 10). First try was blocked (403 `access_denied`) until the account was added under Audience › Test users |
 | 1b | Calls succeed with the band not yet paired (0 points, no errors) | — | ✅ (Nov 11): all 6 types return 0 points, no errors. First needed a Fitbit / Google Health profile on the account (Nov 10: every call returned 400 `ACCOUNT_NOT_LINKED` until the Fitbit app was set up with the same Google account) |
-| 2 | Heart-rate sampling interval, and gaps during the day | ~5 s, continuous | |
-| 2b | `reconcile` vs `list`: same points, or duplicates removed? | — | |
-| 3 | Step interval length | 1 min | |
-| 4 | HRV samples only inside sleep sessions? | Overnight only (#3) | |
-| 4b | Daily HRV and resting heart rate present for each night | Yes | |
-| 5 | Delay: newest heart-rate sample vs last sync; does it update without opening the Fitbit app? | Near real time | |
-| 6 | At least 50% of minutes have heart rate, so the model's 30-min windows can be built | Yes | |
+| 2 | Heart-rate sampling interval, and gaps during the day | ~5 s, continuous | ✅ (Nov 16, 4 days): **denser than assumed**: median gap 2 s (1 s 16%, 2 s 49%, 3 s 35%), about 28 readings a minute; no gap over 1 min; 157,721 samples, 55–162 bpm. Field names confirmed with `raw`: `sampleTime.physicalTime`, `beatsPerMinute` (a string). LifeSnaps has ~9 a minute; thinning to that leaves the within-minute spread unchanged |
+| 2b | `reconcile` vs `list`: same points, or duplicates removed? | — | ✅ Same: 157,721 each (one device, so nothing to merge) |
+| 3 | Step interval length | 1 min | ✅ All 1,186 intervals are 60 s; count is a string field `count` |
+| 4 | HRV samples only inside sleep sessions? | Overnight only (#3) | ✅ **Yes**: 289 of 289 inside the 5 sleep sessions, 0 outside; RMSSD field `rootMeanSquareOfSuccessiveDifferencesMilliseconds`, plus LF/HF power |
+| 4b | Daily HRV and resting heart rate present for each night | Yes | ✅ 4 of 4 days each |
+| 5 | Delay: newest heart-rate sample vs last sync; does it update without opening the Fitbit app? | Near real time | Partly: newest sample 14 min old (Nov 16, 17:40); Nov 11 tick: 8 min. Still to do: compare with the Fitbit app's last-sync time, and check with the app closed for an hour |
+| 6 | At least 50% of minutes have heart rate, so the model's 30-min windows can be built | Yes | ✅ 100% of 5,746 minutes |
 | 7 | Sign-in from the phone app (iOS now, Android later) | Yes | Later step |
 | 8 | Wrist alert: a MoodBand notification buzzes on the Inspire 3 (decisions.md #13 open item) | — | |
 

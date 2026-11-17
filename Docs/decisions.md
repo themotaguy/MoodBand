@@ -647,7 +647,7 @@ hardware, and that remains the plan for this project.
 
 ## Open items / things to verify before trusting the above
 
-- [ ] **Confirm the new Google Health API's actual behavior** — does it
+- [x] **Confirm the new Google Health API's actual behavior** — does it
   really provide 5-second HR resolution with no approval step? Is HRV still
   overnight-only, or has that changed? (Ties to Decision #2 and #3.)
   Nov 9: prototype built (`healthapi/probe.py`), setup and checklist in
@@ -655,6 +655,20 @@ hardware, and that remains the plan for this project.
   for heart rate and don't say whether HRV is sleep-only, so both need the
   Inspire 3's own data. The API only has data after the band syncs, so the
   delay behind real time is also a check.
+  **Nov 16, answered on 4 days of the Inspire 3's data** (`probe.py`, results
+  in `Docs/google-health-api.md`): heart rate comes every **1–3 s** (median
+  2 s, about 28 readings a minute), denser than the 5 s the proposal
+  assumes, with no approval step beyond OAuth test users. **HRV is
+  overnight-only**: all 289 HRV samples fell inside sleep sessions, none
+  outside, so Decision #3 holds under the new API. Steps come as 1-minute
+  intervals, and 100% of minutes had heart rate. Newest sample was 14 min
+  old; how that relates to syncing is still open (checklist row 5).
+  Training data (LifeSnaps) has about 9 readings a minute. Thinning the
+  Inspire 3's readings to that rate leaves the within-minute spread
+  (`hr_within_std`) unchanged, so the rate difference is harmless; the
+  spread is somewhat higher than LifeSnaps' (median 2.2 vs 1.7 bpm), which
+  one person's data can't attribute to the device or the person. Recheck on
+  trial participants.
 - [ ] **Wrist alerts via Fitbit notification mirroring** (Decision #13) — when
   the Fitbit (Inspire 3 recommended, Oct 21) arrives: enable MoodBand under
   Fitbit app → device → Notifications → App Notifications, then check that a

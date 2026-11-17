@@ -94,6 +94,10 @@ Not yet done / in progress:
    module → `data/live/log.jsonl`, served at `GET /live`); 11 tests
    (`python -m unittest discover -s healthapi/tests -t .`). First API tick
    returned real heart rate. The phone side (polling `/live`) isn't built.
+   **Nov 16 checks on 4 days of Inspire 3 data**: HR every 1–3 s (denser
+   than the assumed 5 s), HRV overnight-only confirmed (all samples inside
+   sleep), 1-min steps, 100% minute coverage. Left: sync delay (row 5),
+   wrist alert (row 8), phone sign-in (row 7).
 4. Prof. Zantout was separately checking with Dr. Yoon about a possibly
    related wearable project elsewhere on campus — informational, no action
    needed from the code side.
@@ -141,9 +145,9 @@ refactored to run on-device — check `docs/decisions.md` before "fixing" this.
 - **HRV is overnight-only.** Fitbit (via the Google Health API) does not
   expose live daytime HRV. The classifier should treat HR + motion as the
   real-time, waking-state features, and HRV as a supplementary nightly
-  feature only. This needs re-confirming against the *new* Google Health API
-  specifically (task 2 above) — the lit review's HRV finding was from the
-  legacy Fitbit Web API, which was deprecated in Oct 2026.
+  feature only. The lit review's finding came from the legacy Fitbit Web
+  API; **confirmed under the new Google Health API on Nov 16** (all 289 HRV
+  samples from 4 days of Inspire 3 data fell inside sleep sessions).
 - **Single student, 16-week timeline.** Build order is deliberately: model +
   feedback module + mobile app, validated end-to-end on offline/public
   datasets first → only then integrate the live Fitbit/Google Health API.

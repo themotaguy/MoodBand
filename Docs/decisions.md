@@ -662,7 +662,10 @@ hardware, and that remains the plan for this project.
   overnight-only**: all 289 HRV samples fell inside sleep sessions, none
   outside, so Decision #3 holds under the new API. Steps come as 1-minute
   intervals, and 100% of minutes had heart rate. Newest sample was 14 min
-  old; how that relates to syncing is still open (checklist row 5).
+  old with the Fitbit app open, but **69 min old with it closed** (19:13), so
+  "near real time" holds only while the phone's Fitbit app keeps syncing
+  (row 5; retest with All-Day Sync / Background App Refresh on). If
+  that doesn't fix it, live suggestions arrive late or not at all.
   Training data (LifeSnaps) has about 9 readings a minute. Thinning the
   Inspire 3's readings to that rate leaves the within-minute spread
   (`hr_within_std`) unchanged, so the rate difference is harmless; the

@@ -127,7 +127,7 @@ Nov 16.
 | 3 | Step interval length | 1 min | ✅ All 1,186 intervals are 60 s; count is a string field `count` |
 | 4 | HRV samples only inside sleep sessions? | Overnight only (#3) | ✅ **Yes**: 289 of 289 inside the 5 sleep sessions, 0 outside; RMSSD field `rootMeanSquareOfSuccessiveDifferencesMilliseconds`, plus LF/HF power |
 | 4b | Daily HRV and resting heart rate present for each night | Yes | ✅ 4 of 4 days each |
-| 5 | Delay: newest heart-rate sample vs last sync; does it update without opening the Fitbit app? | Near real time | Partly: newest sample 14 min old (Nov 16, 17:40); Nov 11 tick: 8 min. Still to do: compare with the Fitbit app's last-sync time, and check with the app closed for an hour |
+| 5 | Delay: newest heart-rate sample vs last sync; does it update without opening the Fitbit app? | Near real time | ⚠️ **Not real time without the Fitbit app**: with the app open, newest sample 8–14 min old (Nov 11, Nov 16 17:40). With the app closed, 69 min old at 19:13 (Nov 16), so the live tick had no usable window (`no_data`). Next: turn on All-Day Sync / Background App Refresh for the Fitbit app on iOS and retest |
 | 6 | At least 50% of minutes have heart rate, so the model's 30-min windows can be built | Yes | ✅ 100% of 5,746 minutes |
 | 7 | Sign-in from the phone app (iOS now, Android later) | Yes | Later step |
 | 8 | Wrist alert: a MoodBand notification buzzes on the Inspire 3 (decisions.md #13 open item) | — | |
